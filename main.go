@@ -4,24 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"git.andreafazzi.eu/andrea/probo/lib/store/file"
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/remogatto/bubbletea-app/ui"
 	"github.com/remogatto/bubbletea-app/ui/components/table"
 	"github.com/remogatto/bubbletea-app/ui/components/textinput"
+	"github.com/remogatto/bubbletea-app/ui/layout/tiled"
 
 	tea "github.com/charmbracelet/bubbletea"
-)
-
-type focusState int
-
-const (
-	inputFocus focusState = iota
-	jsonViewportFocus
-	tableFocus
-
-	tableAndViewportHeight = 20
 )
 
 type keyBindings struct {
@@ -75,36 +64,54 @@ func newBindings() keyBindings {
 }
 
 type model struct {
+	layout     *ui.Layout
 	components []ui.Component
 	bindings   keyBindings
 
-	pStore       *file.ParticipantFileStore
-	pJson        []byte
-	participants []any
+	currFocus int
 }
 
 func initialModel() model {
-	components := []ui.Component{
-		textinput.New(
-			textinput.WithStyles(&textinput.Styles{
-				BlurBorder:    blurTextInputStyle,
-				FocusedBorder: focusedTextInputStyle,
-			}),
-			textinput.WithPlaceholder("Insert a jq filter..."),
-		),
-		table.New(),
-	}
+	textinput := textinput.New(
+		textinput.WithStyles(&textinput.Styles{
+			BlurredBorder: blurredTextInputStyle,
+			FocusedBorder: focusedTextInputStyle,
+		}),
+		textinput.WithPlaceholder("Text input goes here..."),
+	)
+
+	table1 := table.New(
+		table.WithStyles(&table.Styles{
+			BlurredBorder: blurredTableStyle,
+			FocusedBorder: focusedTableStyle,
+		}),
+	)
+
+	table2 := table.New(
+		table.WithStyles(&table.Styles{
+			BlurredBorder: blurredTableStyle,
+			FocusedBorder: focusedTableStyle,
+		}),
+	)
+
+	table3 := table.New(
+		table.WithStyles(&table.Styles{
+			BlurredBorder: blurredTableStyle,
+			FocusedBorder: focusedTableStyle,
+		}),
+	)
 
 	return model{
-		components: components,
+		layout: ui.NewLayout(80, 25).
+			AddItem(textinput).
+			AddItem(tiled.New(80, 25, table1, table2, table3)),
+		components: []ui.Component{textinput, table1, table2},
 		bindings:   newBindings(),
 	}
 }
 
 func (m *model) setSize(msg tea.WindowSizeMsg) {
-	for _, c := range m.components {
-		c.SetSize(msg)
-	}
+	m.layout.SetSize(msg.Width, msg.Height)
 }
 
 func (m *model) updateComponents(msg tea.Msg) []tea.Cmd {
@@ -116,6 +123,12 @@ func (m *model) updateComponents(msg tea.Msg) []tea.Cmd {
 	}
 
 	return cmds
+}
+
+func (m *model) nextFocus() {
+	m.components[m.currFocus].Blur()
+	m.currFocus = (m.currFocus + 1) % len(m.components)
+	m.components[m.currFocus].Focus()
 }
 
 func (m model) Init() tea.Cmd {
@@ -134,6 +147,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch {
+		case key.Matches(msg, m.bindings.Tab):
+			m.nextFocus()
+
 		case key.Matches(msg, m.bindings.Quit):
 			return m, tea.Quit
 
@@ -146,22 +162,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m model) View() string {
-	views := []string{}
-
-	for _, c := range m.components {
-		views = append(views, c.View())
-	}
-
-	return lipgloss.JoinVertical(lipgloss.Top, views...)
-	// for _, c := range m.components {
-	// 	content += c.View()
-	// }
-
-	// return content
+	return m.layout.String()
 }
 
 func main() {
-	if _, err := tea.NewProgram(initialModel() /*tea.WithAltScreen()*/).Run(); err != nil {
+	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

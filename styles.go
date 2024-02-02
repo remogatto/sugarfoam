@@ -1,12 +1,18 @@
 package main
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"github.com/charmbracelet/lipgloss"
+	"github.com/remogatto/bubbletea-app/ui/components/table"
+	"github.com/remogatto/bubbletea-app/ui/components/textinput"
+)
 
 var (
-	blurTextInputStyle    = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder()).Margin(1)
-	focusedTextInputStyle = blurTextInputStyle.Copy().BorderForeground(lipgloss.Color("5"))
+	blurredTextInputStyle = textinput.DefaultStyles().BlurredBorder.Margin(1)
+	focusedTextInputStyle = textinput.DefaultStyles().FocusedBorder.Margin(1)
 
-	tableStyle       = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder())
+	blurredTableStyle = table.DefaultStyles().BlurredBorder.Margin(1)
+	focusedTableStyle = table.DefaultStyles().FocusedBorder.Margin(1)
+
 	headerTableStyle = lipgloss.NewStyle().Bold(true)
 
 	jsonViewportStyle = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder())

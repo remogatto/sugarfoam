@@ -14,8 +14,9 @@ type Styles struct {
 }
 
 type Table struct {
-	m      *table.Model
-	styles *Styles
+	m             *table.Model
+	width, height int
+	styles        *Styles
 }
 
 func New(opts ...Option) *Table {
@@ -32,6 +33,7 @@ func New(opts ...Option) *Table {
 				[]string{"Cell 11", "Cell 12", "Cell 13"},
 				[]string{"Cell 21", "Cell 22", "Cell 23"},
 				[]string{"Cell 31", "Cell 32", "Cell 33"},
+				[]string{"Cell 41", "Cell 42", "Cell 43"},
 			},
 		),
 	)
@@ -41,6 +43,18 @@ func New(opts ...Option) *Table {
 	}
 
 	ti.styles = DefaultStyles()
+
+	s := table.DefaultStyles()
+	s.Header = s.Header.
+		BorderStyle(lipgloss.NormalBorder()).
+		BorderForeground(lipgloss.Color("240")).
+		BorderBottom(true).
+		Bold(false)
+	s.Selected = s.Selected.
+		Foreground(lipgloss.Color("229")).
+		Background(lipgloss.Color("57")).
+		Bold(false)
+	ti.m.SetStyles(s)
 
 	for _, opt := range opts {
 		opt(ti)
@@ -62,15 +76,25 @@ func WithStyles(styles *Styles) Option {
 	}
 }
 
-func (t *Table) SetSize(msg tea.WindowSizeMsg) {
-	if t.m.Focused() {
-		t.styles.FocusedBorder = t.styles.FocusedBorder.Width(msg.Width - t.styles.FocusedBorder.GetHorizontalFrameSize())
-	}
-	t.styles.BlurredBorder = t.styles.BlurredBorder.Width(msg.Width - t.styles.BlurredBorder.GetHorizontalFrameSize())
+func (t *Table) SetSize(width int, height int) {
+	t.width = width - t.styles.FocusedBorder.GetHorizontalFrameSize()
+	t.height = height
+
+	t.styles.FocusedBorder = t.styles.FocusedBorder.Width(t.width)
+	t.styles.BlurredBorder = t.styles.BlurredBorder.Width(t.width)
 }
+
+func (t *Table) Width() int  { return t.width }
+func (t *Table) Height() int { return t.height }
 
 func (t *Table) Focus() tea.Cmd {
 	t.m.Focus()
+
+	return nil
+}
+
+func (t *Table) Blur() tea.Cmd {
+	t.m.Blur()
 
 	return nil
 }
@@ -92,3 +116,5 @@ func (t *Table) View() string {
 	}
 	return t.styles.BlurredBorder.Render(t.m.View())
 }
+
+func (t *Table) String() string { return t.View() }
