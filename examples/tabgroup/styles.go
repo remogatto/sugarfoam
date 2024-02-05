@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/remogatto/bubbletea-app/ui/components/table"
-	"github.com/remogatto/bubbletea-app/ui/components/textinput"
+	"github.com/remogatto/sugarfoam/ui/components/table"
+	"github.com/remogatto/sugarfoam/ui/components/textinput"
 )
 
 var (

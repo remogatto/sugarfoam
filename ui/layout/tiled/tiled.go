@@ -2,7 +2,7 @@ package tiled
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/remogatto/bubbletea-app/ui"
+	"github.com/remogatto/sugarfoam/ui"
 )
 
 type HorizontalTile struct {

@@ -7,7 +7,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/remogatto/bubbletea-app/ui"
+	"github.com/remogatto/sugarfoam/ui"
 )
 
 type Option func(*TabGroup)

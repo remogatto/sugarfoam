@@ -5,12 +5,12 @@ import (
 	"os"
 
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/remogatto/bubbletea-app/ui"
-	"github.com/remogatto/bubbletea-app/ui/components/group"
-	"github.com/remogatto/bubbletea-app/ui/components/tabgroup"
-	"github.com/remogatto/bubbletea-app/ui/components/table"
-	"github.com/remogatto/bubbletea-app/ui/components/textinput"
-	"github.com/remogatto/bubbletea-app/ui/layout/tiled"
+	"github.com/remogatto/sugarfoam/ui"
+	"github.com/remogatto/sugarfoam/ui/components/group"
+	"github.com/remogatto/sugarfoam/ui/components/tabgroup"
+	"github.com/remogatto/sugarfoam/ui/components/table"
+	"github.com/remogatto/sugarfoam/ui/components/textinput"
+	"github.com/remogatto/sugarfoam/ui/layout/tiled"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
