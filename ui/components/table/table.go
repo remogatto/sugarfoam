@@ -14,7 +14,7 @@ type Styles struct {
 }
 
 type Table struct {
-	m             *table.Model
+	*table.Model
 	width, height int
 	styles        *Styles
 }
@@ -39,7 +39,7 @@ func New(opts ...Option) *Table {
 	)
 
 	ti := &Table{
-		m: &t,
+		Model: &t,
 	}
 
 	ti.styles = DefaultStyles()
@@ -54,7 +54,7 @@ func New(opts ...Option) *Table {
 		Foreground(lipgloss.Color("229")).
 		Background(lipgloss.Color("57")).
 		Bold(false)
-	ti.m.SetStyles(s)
+	ti.SetStyles(s)
 
 	for _, opt := range opts {
 		opt(ti)
@@ -88,15 +88,13 @@ func (t *Table) Width() int  { return t.width }
 func (t *Table) Height() int { return t.height }
 
 func (t *Table) Focus() tea.Cmd {
-	t.m.Focus()
+	t.Model.Focus()
 
 	return nil
 }
 
-func (t *Table) Blur() tea.Cmd {
-	t.m.Blur()
-
-	return nil
+func (t *Table) Blur() {
+	t.Model.Blur()
 }
 
 func (t *Table) Init() tea.Cmd {
@@ -104,17 +102,18 @@ func (t *Table) Init() tea.Cmd {
 }
 
 func (t *Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	table, cmd := t.m.Update(msg)
-	t.m = &table
+	table, cmd := t.Model.Update(msg)
+
+	t.Model = &table
 
 	return t, cmd
 }
 
 func (t *Table) View() string {
-	if t.m.Focused() {
-		return t.styles.FocusedBorder.Render(t.m.View())
+	if t.Focused() {
+		return t.styles.FocusedBorder.Render(t.Model.View())
 	}
-	return t.styles.BlurredBorder.Render(t.m.View())
+	return t.styles.BlurredBorder.Render(t.Model.View())
 }
 
 func (t *Table) String() string { return t.View() }

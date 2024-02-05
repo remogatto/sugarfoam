@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	blurredTextInputStyle = textinput.DefaultStyles().BlurredBorder.Margin(1)
-	focusedTextInputStyle = textinput.DefaultStyles().FocusedBorder.Margin(1)
+	blurredTextInputStyle = textinput.DefaultStyles().BlurredBorder.Margin(1, 1, 0, 1)
+	focusedTextInputStyle = textinput.DefaultStyles().FocusedBorder.Margin(1, 1, 0, 1)
 
 	blurredTableStyle = table.DefaultStyles().BlurredBorder.Margin(1)
 	focusedTableStyle = table.DefaultStyles().FocusedBorder.Margin(1)

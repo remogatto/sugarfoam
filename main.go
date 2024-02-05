@@ -6,6 +6,8 @@ import (
 
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/remogatto/bubbletea-app/ui"
+	"github.com/remogatto/bubbletea-app/ui/components/group"
+	"github.com/remogatto/bubbletea-app/ui/components/tabgroup"
 	"github.com/remogatto/bubbletea-app/ui/components/table"
 	"github.com/remogatto/bubbletea-app/ui/components/textinput"
 	"github.com/remogatto/bubbletea-app/ui/layout/tiled"
@@ -15,10 +17,6 @@ import (
 
 type keyBindings struct {
 	Quit key.Binding
-	Tab  key.Binding
-
-	// Enter key.Binding
-	// table.KeyMap
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
@@ -26,10 +24,6 @@ type keyBindings struct {
 func (k keyBindings) ShortHelp() []key.Binding {
 	return []key.Binding{
 		k.Quit,
-		k.Tab,
-		// k.Enter,
-		// k.LineUp,
-		// k.LineDown,
 	}
 }
 
@@ -39,10 +33,6 @@ func (k keyBindings) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{
 			k.Quit,
-			k.Tab,
-			// k.Enter,
-			// k.LineUp,
-			// k.LineDown,
 		},
 	}
 }
@@ -52,23 +42,12 @@ func newBindings() keyBindings {
 		key.NewBinding(
 			key.WithKeys("esc"), key.WithHelp("esc", "Quit app"),
 		),
-		key.NewBinding(
-			key.WithKeys("tab"), key.WithHelp("tab", "Switch table/input"),
-		),
-		// key.NewBinding(
-		// 	key.WithKeys("enter"), key.WithHelp("enter", "Submit query"),
-		// ),
-
-		//		table.KeyMap,
 	}
 }
 
 type model struct {
-	layout     *ui.Layout
-	components []ui.Component
-	bindings   keyBindings
-
-	currFocus int
+	tabgroup *tabgroup.TabGroup
+	bindings keyBindings
 }
 
 func initialModel() model {
@@ -101,44 +80,37 @@ func initialModel() model {
 		}),
 	)
 
+	group := group.New(
+		group.WithItems(textinput, table1, table2),
+		group.WithLayout(ui.NewLayout(80, 25).AddItem(textinput).AddItem(tiled.New(80, 25, table1, table2))),
+	)
+
+	tabgroup := tabgroup.New().
+		AddItem(&tabgroup.TabItem{Title: "Tab1", Groupable: group}).
+		AddItem(&tabgroup.TabItem{Title: "Tab2", Groupable: table3})
+
 	return model{
-		layout: ui.NewLayout(80, 25).
-			AddItem(textinput).
-			AddItem(tiled.New(80, 25, table1, table2, table3)),
-		components: []ui.Component{textinput, table1, table2},
-		bindings:   newBindings(),
+		tabgroup: tabgroup,
+		bindings: newBindings(),
 	}
 }
 
 func (m *model) setSize(msg tea.WindowSizeMsg) {
-	m.layout.SetSize(msg.Width, msg.Height)
-}
-
-func (m *model) updateComponents(msg tea.Msg) []tea.Cmd {
-	cmds := make([]tea.Cmd, 0)
-
-	for _, c := range m.components {
-		_, cmd := c.Update(msg)
-		cmds = append(cmds, cmd)
-	}
-
-	return cmds
-}
-
-func (m *model) nextFocus() {
-	m.components[m.currFocus].Blur()
-	m.currFocus = (m.currFocus + 1) % len(m.components)
-	m.components[m.currFocus].Focus()
+	m.tabgroup.SetSize(msg.Width, msg.Height)
 }
 
 func (m model) Init() tea.Cmd {
-	return m.components[0].Focus()
+	var cmds []tea.Cmd
+
+	cmds = append(cmds, m.tabgroup.Init())
+
+	m.tabgroup.Focus()
+
+	return tea.Batch(cmds...)
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var (
-		cmds []tea.Cmd
-	)
+	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
 
@@ -147,22 +119,21 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tea.KeyMsg:
 		switch {
-		case key.Matches(msg, m.bindings.Tab):
-			m.nextFocus()
-
 		case key.Matches(msg, m.bindings.Quit):
 			return m, tea.Quit
 
 		}
 	}
 
-	cmds = append(cmds, m.updateComponents(msg)...)
+	_, cmd := m.tabgroup.Update(msg)
+
+	cmds = append(cmds, cmd)
 
 	return m, tea.Batch(cmds...)
 }
 
 func (m model) View() string {
-	return m.layout.String()
+	return m.tabgroup.View()
 }
 
 func main() {

@@ -14,7 +14,7 @@ type Styles struct {
 }
 
 type TextInput struct {
-	m *textinput.Model
+	*textinput.Model
 
 	width, height int
 
@@ -26,7 +26,7 @@ func New(opts ...Option) *TextInput {
 	t.Placeholder = "Text here..."
 
 	ti := &TextInput{
-		m: &t,
+		Model: &t,
 	}
 
 	ti.styles = DefaultStyles()
@@ -47,7 +47,7 @@ func DefaultStyles() *Styles {
 
 func WithPlaceholder(placeholder string) Option {
 	return func(ti *TextInput) {
-		ti.m.Placeholder = placeholder
+		ti.Model.Placeholder = placeholder
 	}
 }
 
@@ -58,44 +58,30 @@ func WithStyles(styles *Styles) Option {
 }
 
 func (ti *TextInput) SetSize(width int, height int) {
-
 	ti.width = width - ti.styles.FocusedBorder.GetHorizontalFrameSize()
 	ti.height = height
 
 	ti.styles.FocusedBorder = ti.styles.FocusedBorder.Width(ti.width)
 	ti.styles.BlurredBorder = ti.styles.BlurredBorder.Width(ti.width)
-
 }
 
 func (ti *TextInput) Width() int  { return ti.width }
 func (ti *TextInput) Height() int { return ti.height }
-
-func (ti *TextInput) Focus() tea.Cmd {
-	return ti.m.Focus()
-}
-
-func (ti *TextInput) Blur() tea.Cmd {
-	ti.m.Blur()
-
-	return nil
-}
 
 func (ti *TextInput) Init() tea.Cmd {
 	return textinput.Blink
 }
 
 func (ti *TextInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	t, cmd := ti.m.Update(msg)
-	ti.m = &t
+	t, cmd := ti.Model.Update(msg)
+	ti.Model = &t
 
 	return ti, cmd
 }
 
 func (ti *TextInput) View() string {
-	if ti.m.Focused() {
-		return ti.styles.FocusedBorder.Render(ti.m.View())
+	if ti.Focused() {
+		return ti.styles.FocusedBorder.Render(ti.Model.View())
 	}
-	return ti.styles.BlurredBorder.Render(ti.m.View())
+	return ti.styles.BlurredBorder.Render(ti.Model.View())
 }
-
-func (ti *TextInput) String() string { return ti.View() }
