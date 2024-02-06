@@ -7,7 +7,8 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/remogatto/sugarfoam/ui"
+	foam "github.com/remogatto/sugarfoam"
+	"github.com/remogatto/sugarfoam/components/group"
 )
 
 type Option func(*TabGroup)
@@ -18,29 +19,28 @@ type KeyMap struct {
 }
 
 type Styles struct {
-	FocusedBorder         lipgloss.Style
-	BlurredBorder         lipgloss.Style
 	Navbar                lipgloss.Style
 	NavbarTitleUnselected lipgloss.Style
 	NavbarTitleSelected   lipgloss.Style
 }
 
 type TabItem struct {
-	ui.Groupable
+	Group *group.Group
 
 	Title  string
 	Active bool
 }
 
 type TabGroup struct {
+	foam.Common
+
 	KeyMap KeyMap
 
 	items         []*TabItem
 	currItemIndex int
 
-	width, height int
-	focused       bool
-	styles        *Styles
+	focused bool
+	styles  *Styles
 }
 
 func DefaultKeyMap() KeyMap {
@@ -61,6 +61,8 @@ func New(opts ...Option) *TabGroup {
 	}
 
 	tg.KeyMap = DefaultKeyMap()
+
+	tg.Common.SetStyles(foam.DefaultStyles())
 	tg.styles = DefaultStyles()
 
 	return tg
@@ -78,9 +80,7 @@ func (tg *TabGroup) AddItem(item *TabItem) *TabGroup {
 
 func DefaultStyles() *Styles {
 	return &Styles{
-		FocusedBorder: lipgloss.NewStyle().Margin(2, 0, 0, 0), /*Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("5")),*/
-		BlurredBorder: lipgloss.NewStyle().Margin(2, 0, 0, 0), /*Border(lipgloss.RoundedBorder()),*/
-		Navbar:        lipgloss.NewStyle().Padding(0, 1, 0, 1),
+		Navbar: lipgloss.NewStyle().Padding(0, 1, 0, 1),
 		NavbarTitleUnselected: lipgloss.NewStyle().
 			Background(lipgloss.Color("#373B41")).
 			Foreground(lipgloss.Color("240")).
@@ -96,7 +96,7 @@ func (tg *TabGroup) Init() tea.Cmd {
 	var cmds []tea.Cmd
 
 	for _, item := range tg.items {
-		cmds = append(cmds, item.Init())
+		cmds = append(cmds, item.Group.Init())
 	}
 
 	return tea.Batch(cmds...)
@@ -132,21 +132,14 @@ func (tg *TabGroup) Blur() {
 }
 
 func (tg *TabGroup) SetSize(width int, height int) {
-	tg.width = width - tg.styles.FocusedBorder.GetHorizontalFrameSize()
-	tg.height = height
+	tg.Common.SetSize(width, height)
 
-	tg.styles.FocusedBorder = tg.styles.FocusedBorder.Width(tg.width)
-	tg.styles.BlurredBorder = tg.styles.BlurredBorder.Width(tg.width)
-
-	tg.styles.Navbar = tg.styles.Navbar.Width(tg.width)
+	tg.styles.Navbar = tg.styles.Navbar.Width(tg.GetWidth())
 
 	for _, item := range tg.items {
-		item.SetSize(tg.width, tg.height)
+		item.Group.SetSize(tg.GetWidth(), tg.GetHeight())
 	}
 }
-
-func (tg *TabGroup) Width() int  { return tg.width }
-func (tg *TabGroup) Height() int { return tg.height }
 
 func (tg *TabGroup) View() string {
 	var navbar string
@@ -162,10 +155,10 @@ func (tg *TabGroup) View() string {
 	navbar = tg.styles.Navbar.Render(strings.TrimRight(navbar, "• "))
 
 	if len(tg.items) > 0 {
-		return tg.styles.FocusedBorder.Render(lipgloss.JoinVertical(lipgloss.Top, navbar, tg.items[tg.currItemIndex].View()))
+		return tg.Common.GetStyles().Focused.Render(lipgloss.JoinVertical(lipgloss.Top, navbar, tg.items[tg.currItemIndex].Group.View()))
 	}
 
-	return tg.styles.FocusedBorder.Render(navbar)
+	return tg.Common.GetStyles().Focused.Render(navbar)
 
 }
 
@@ -185,7 +178,7 @@ func (tg *TabGroup) updateTabItems(msg tea.Msg) []tea.Cmd {
 	cmds := make([]tea.Cmd, 0)
 
 	for _, item := range tg.items {
-		_, cmd := item.Update(msg)
+		_, cmd := item.Group.Update(msg)
 		cmds = append(cmds, cmd)
 	}
 

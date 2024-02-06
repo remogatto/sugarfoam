@@ -1,42 +1,37 @@
-package ui
+package foam
 
 import (
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 )
 
-type Groupable interface {
-	tea.Model
-	LayoutItem
-
-	Focus() tea.Cmd
-	Blur()
+type Sizeable interface {
+	SetSize(width int, height int)
+	GetWidth() int
+	GetHeight() int
 }
 
-type LayoutItem interface {
-	View() string
+type Placeable interface {
+	Sizeable
 
-	SetSize(width int, height int)
-	Width() int
-	Height() int
+	View() string
 }
 
 type Layout struct {
 	width, height int
-	items         []LayoutItem
+	items         []Placeable
 }
 
 func NewLayout(width, height int) *Layout {
 	return &Layout{width: width, height: height}
 }
 
-func (l *Layout) AddItem(i LayoutItem) *Layout {
+func (l *Layout) AddItem(i Placeable) *Layout {
 	l.items = append(l.items, i)
 
 	return l
 }
 
-func (l *Layout) Items() []LayoutItem {
+func (l *Layout) Items() []Placeable {
 	return l.items
 }
 

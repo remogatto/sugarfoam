@@ -4,16 +4,24 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
-	"github.com/remogatto/sugarfoam/ui"
+	foam "github.com/remogatto/sugarfoam"
 )
 
 type Option func(*Group)
 
+type Groupable interface {
+	tea.Model
+	foam.Placeable
+
+	Focus() tea.Cmd
+	Blur()
+}
+
 type Group struct {
 	KeyMap KeyMap
 
-	layout *ui.Layout
-	items  []ui.Groupable
+	layout *foam.Layout
+	items  []Groupable
 
 	width, height int
 	styles        *Styles
@@ -76,7 +84,7 @@ func (g *Group) SetSize(width int, height int) {
 func (g *Group) Width() int  { return g.width }
 func (g *Group) Height() int { return g.height }
 
-func (g *Group) Current() ui.Groupable {
+func (g *Group) Current() Groupable {
 	return g.items[g.currFocus]
 }
 
@@ -127,13 +135,13 @@ func WithKeyMap(km KeyMap) Option {
 		g.KeyMap = km
 	}
 }
-func WithItems(items ...ui.Groupable) Option {
+func WithItems(items ...Groupable) Option {
 	return func(g *Group) {
 		g.items = items
 	}
 }
 
-func WithLayout(layout *ui.Layout) Option {
+func WithLayout(layout *foam.Layout) Option {
 	return func(g *Group) {
 		g.layout = layout
 	}

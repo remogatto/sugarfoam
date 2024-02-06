@@ -4,19 +4,15 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	foam "github.com/remogatto/sugarfoam"
 )
 
 type Option func(*Table)
 
-type Styles struct {
-	FocusedBorder lipgloss.Style
-	BlurredBorder lipgloss.Style
-}
-
 type Table struct {
+	foam.Common
+
 	*table.Model
-	width, height int
-	styles        *Styles
 }
 
 func New(opts ...Option) *Table {
@@ -42,7 +38,7 @@ func New(opts ...Option) *Table {
 		Model: &t,
 	}
 
-	ti.styles = DefaultStyles()
+	ti.Common.SetStyles(foam.DefaultStyles())
 
 	s := table.DefaultStyles()
 	s.Header = s.Header.
@@ -54,7 +50,7 @@ func New(opts ...Option) *Table {
 		Foreground(lipgloss.Color("229")).
 		Background(lipgloss.Color("57")).
 		Bold(false)
-	ti.SetStyles(s)
+	ti.Model.SetStyles(s)
 
 	for _, opt := range opts {
 		opt(ti)
@@ -63,29 +59,11 @@ func New(opts ...Option) *Table {
 	return ti
 }
 
-func DefaultStyles() *Styles {
-	return &Styles{
-		FocusedBorder: lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("5")),
-		BlurredBorder: lipgloss.NewStyle().Border(lipgloss.RoundedBorder()),
-	}
-}
-
-func WithStyles(styles *Styles) Option {
+func WithStyles(styles *foam.Styles) Option {
 	return func(ti *Table) {
-		ti.styles = styles
+		ti.Common.SetStyles(styles)
 	}
 }
-
-func (t *Table) SetSize(width int, height int) {
-	t.width = width - t.styles.FocusedBorder.GetHorizontalFrameSize()
-	t.height = height
-
-	t.styles.FocusedBorder = t.styles.FocusedBorder.Width(t.width)
-	t.styles.BlurredBorder = t.styles.BlurredBorder.Width(t.width)
-}
-
-func (t *Table) Width() int  { return t.width }
-func (t *Table) Height() int { return t.height }
 
 func (t *Table) Focus() tea.Cmd {
 	t.Model.Focus()
@@ -111,9 +89,9 @@ func (t *Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (t *Table) View() string {
 	if t.Focused() {
-		return t.styles.FocusedBorder.Render(t.Model.View())
+		return t.GetStyles().Focused.Render(t.Model.View())
 	}
-	return t.styles.BlurredBorder.Render(t.Model.View())
+	return t.GetStyles().Blurred.Render(t.Model.View())
 }
 
 func (t *Table) String() string { return t.View() }

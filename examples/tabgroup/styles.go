@@ -2,16 +2,15 @@ package main
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/remogatto/sugarfoam/ui/components/table"
-	"github.com/remogatto/sugarfoam/ui/components/textinput"
+	foam "github.com/remogatto/sugarfoam"
 )
 
 var (
-	blurredTextInputStyle = textinput.DefaultStyles().BlurredBorder.Margin(1, 1, 0, 1)
-	focusedTextInputStyle = textinput.DefaultStyles().FocusedBorder.Margin(1, 1, 0, 1)
+	blurredTextInputStyle = foam.DefaultStyles().Blurred.Margin(1, 1, 0, 1)
+	focusedTextInputStyle = foam.DefaultStyles().Focused.Margin(1, 1, 0, 1)
 
-	blurredTableStyle = table.DefaultStyles().BlurredBorder.Margin(1)
-	focusedTableStyle = table.DefaultStyles().FocusedBorder.Margin(1)
+	blurredTableStyle = foam.DefaultStyles().Blurred.Margin(1)
+	focusedTableStyle = foam.DefaultStyles().Focused.Margin(1)
 
 	headerTableStyle = lipgloss.NewStyle().Bold(true)
 

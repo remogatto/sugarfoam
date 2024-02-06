@@ -5,12 +5,12 @@ import (
 	"os"
 
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/remogatto/sugarfoam/ui"
-	"github.com/remogatto/sugarfoam/ui/components/group"
-	"github.com/remogatto/sugarfoam/ui/components/tabgroup"
-	"github.com/remogatto/sugarfoam/ui/components/table"
-	"github.com/remogatto/sugarfoam/ui/components/textinput"
-	"github.com/remogatto/sugarfoam/ui/layout/tiled"
+	foam "github.com/remogatto/sugarfoam"
+	"github.com/remogatto/sugarfoam/components/group"
+	"github.com/remogatto/sugarfoam/components/tabgroup"
+	"github.com/remogatto/sugarfoam/components/table"
+	"github.com/remogatto/sugarfoam/components/textinput"
+	"github.com/remogatto/sugarfoam/layout/tiled"
 
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -52,51 +52,52 @@ type model struct {
 
 func initialModel() model {
 	textinput := textinput.New(
-		textinput.WithStyles(&textinput.Styles{
-			BlurredBorder: blurredTextInputStyle,
-			FocusedBorder: focusedTextInputStyle,
+		textinput.WithStyles(&foam.Styles{
+			Blurred: blurredTextInputStyle,
+			Focused: focusedTextInputStyle,
 		}),
 		textinput.WithPlaceholder("Text input goes here..."),
 	)
 
 	table1 := table.New(
-		table.WithStyles(&table.Styles{
-			BlurredBorder: blurredTableStyle,
-			FocusedBorder: focusedTableStyle,
+		table.WithStyles(&foam.Styles{
+			Blurred: blurredTableStyle,
+			Focused: focusedTableStyle,
 		}),
 	)
 
 	table2 := table.New(
-		table.WithStyles(&table.Styles{
-			BlurredBorder: blurredTableStyle,
-			FocusedBorder: focusedTableStyle,
+		table.WithStyles(&foam.Styles{
+			Blurred: blurredTableStyle,
+			Focused: focusedTableStyle,
 		}),
 	)
 
 	table3 := table.New(
-		table.WithStyles(&table.Styles{
-			BlurredBorder: blurredTableStyle,
-			FocusedBorder: focusedTableStyle,
+		table.WithStyles(&foam.Styles{
+			Blurred: blurredTableStyle,
+			Focused: focusedTableStyle,
 		}),
 	)
 
-	group := group.New(
+	group1 := group.New(
 		group.WithItems(textinput, table1, table2),
-		group.WithLayout(ui.NewLayout(80, 25).AddItem(textinput).AddItem(tiled.New(80, 25, table1, table2))),
+		group.WithLayout(foam.NewLayout(80, 25).AddItem(textinput).AddItem(tiled.New(80, 25, table1, table2))),
+	)
+
+	group2 := group.New(
+		group.WithItems(table3),
+		group.WithLayout(foam.NewLayout(80, 25).AddItem(table3)),
 	)
 
 	tabgroup := tabgroup.New().
-		AddItem(&tabgroup.TabItem{Title: "Tab1", Groupable: group}).
-		AddItem(&tabgroup.TabItem{Title: "Tab2", Groupable: table3})
+		AddItem(&tabgroup.TabItem{Title: "Group 1", Group: group1}).
+		AddItem(&tabgroup.TabItem{Title: "Group 2", Group: group2})
 
 	return model{
 		tabgroup: tabgroup,
 		bindings: newBindings(),
 	}
-}
-
-func (m *model) setSize(msg tea.WindowSizeMsg) {
-	m.tabgroup.SetSize(msg.Width, msg.Height)
 }
 
 func (m model) Init() tea.Cmd {
@@ -115,7 +116,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 
 	case tea.WindowSizeMsg:
-		m.setSize(msg)
+		m.tabgroup.SetSize(msg.Width, msg.Height)
 
 	case tea.KeyMsg:
 		switch {
