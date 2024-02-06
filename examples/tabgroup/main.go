@@ -46,7 +46,7 @@ func newBindings() keyBindings {
 }
 
 type model struct {
-	tabgroup *tabgroup.TabGroup
+	tabgroup *tabgroup.Model
 	bindings keyBindings
 }
 

@@ -11,7 +11,7 @@ import (
 	"github.com/remogatto/sugarfoam/components/group"
 )
 
-type Option func(*TabGroup)
+type Option func(*Model)
 
 type KeyMap struct {
 	TabNext key.Binding
@@ -25,13 +25,13 @@ type Styles struct {
 }
 
 type TabItem struct {
-	Group *group.Group
+	Group *group.Model
 
 	Title  string
 	Active bool
 }
 
-type TabGroup struct {
+type Model struct {
 	foam.Common
 
 	KeyMap KeyMap
@@ -55,8 +55,8 @@ func DefaultKeyMap() KeyMap {
 	}
 }
 
-func New(opts ...Option) *TabGroup {
-	tg := &TabGroup{
+func New(opts ...Option) *Model {
+	tg := &Model{
 		items: make([]*TabItem, 0),
 	}
 
@@ -68,11 +68,11 @@ func New(opts ...Option) *TabGroup {
 	return tg
 }
 
-func (tg *TabGroup) Items() []*TabItem {
+func (tg *Model) Items() []*TabItem {
 	return tg.items
 }
 
-func (tg *TabGroup) AddItem(item *TabItem) *TabGroup {
+func (tg *Model) AddItem(item *TabItem) *Model {
 	tg.items = append(tg.items, item)
 
 	return tg
@@ -92,7 +92,7 @@ func DefaultStyles() *Styles {
 	}
 }
 
-func (tg *TabGroup) Init() tea.Cmd {
+func (tg *Model) Init() tea.Cmd {
 	var cmds []tea.Cmd
 
 	for _, item := range tg.items {
@@ -102,7 +102,7 @@ func (tg *TabGroup) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (tg *TabGroup) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (tg *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
@@ -122,16 +122,16 @@ func (tg *TabGroup) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 }
 
-func (tg *TabGroup) Focus() tea.Cmd {
+func (tg *Model) Focus() tea.Cmd {
 	tg.focused = true
 	return nil
 }
 
-func (tg *TabGroup) Blur() {
+func (tg *Model) Blur() {
 	tg.focused = false
 }
 
-func (tg *TabGroup) SetSize(width int, height int) {
+func (tg *Model) SetSize(width int, height int) {
 	tg.Common.SetSize(width, height)
 
 	tg.styles.Navbar = tg.styles.Navbar.Width(tg.GetWidth())
@@ -141,7 +141,7 @@ func (tg *TabGroup) SetSize(width int, height int) {
 	}
 }
 
-func (tg *TabGroup) View() string {
+func (tg *Model) View() string {
 	var navbar string
 
 	for i, item := range tg.Items() {
@@ -162,11 +162,11 @@ func (tg *TabGroup) View() string {
 
 }
 
-func (tg *TabGroup) nextTab() {
+func (tg *Model) nextTab() {
 	tg.currItemIndex = (tg.currItemIndex + 1) % len(tg.items)
 }
 
-func (tg *TabGroup) prevTab() {
+func (tg *Model) prevTab() {
 	tg.currItemIndex = (tg.currItemIndex - 1) % len(tg.items)
 
 	if tg.currItemIndex < 0 {
@@ -174,7 +174,7 @@ func (tg *TabGroup) prevTab() {
 	}
 }
 
-func (tg *TabGroup) updateTabItems(msg tea.Msg) []tea.Cmd {
+func (tg *Model) updateTabItems(msg tea.Msg) []tea.Cmd {
 	cmds := make([]tea.Cmd, 0)
 
 	for _, item := range tg.items {

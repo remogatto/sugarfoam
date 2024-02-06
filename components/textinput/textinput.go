@@ -6,19 +6,19 @@ import (
 	foam "github.com/remogatto/sugarfoam"
 )
 
-type Option func(*TextInput)
+type Option func(*Model)
 
-type TextInput struct {
+type Model struct {
 	foam.Common
 
 	*textinput.Model
 }
 
-func New(opts ...Option) *TextInput {
+func New(opts ...Option) *Model {
 	t := textinput.New()
 	t.Placeholder = "Text here..."
 
-	ti := &TextInput{
+	ti := &Model{
 		Model: &t,
 	}
 
@@ -32,29 +32,29 @@ func New(opts ...Option) *TextInput {
 }
 
 func WithPlaceholder(placeholder string) Option {
-	return func(ti *TextInput) {
+	return func(ti *Model) {
 		ti.Model.Placeholder = placeholder
 	}
 }
 
 func WithStyles(styles *foam.Styles) Option {
-	return func(ti *TextInput) {
+	return func(ti *Model) {
 		ti.SetStyles(styles)
 	}
 }
 
-func (ti *TextInput) Init() tea.Cmd {
+func (ti *Model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (ti *TextInput) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (ti *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	t, cmd := ti.Model.Update(msg)
 	ti.Model = &t
 
 	return ti, cmd
 }
 
-func (ti *TextInput) View() string {
+func (ti *Model) View() string {
 	if ti.Focused() {
 		return ti.GetStyles().Focused.Render(ti.Model.View())
 	}

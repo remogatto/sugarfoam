@@ -7,9 +7,9 @@ import (
 	foam "github.com/remogatto/sugarfoam"
 )
 
-type Option func(*Group)
+type Option func(*Model)
 
-type Groupable interface {
+type Modelable interface {
 	tea.Model
 	foam.Placeable
 
@@ -17,11 +17,11 @@ type Groupable interface {
 	Blur()
 }
 
-type Group struct {
+type Model struct {
 	KeyMap KeyMap
 
 	layout *foam.Layout
-	items  []Groupable
+	items  []Modelable
 
 	width, height int
 	styles        *Styles
@@ -34,8 +34,8 @@ type Styles struct {
 	BlurredBorder lipgloss.Style
 }
 
-func New(opts ...Option) *Group {
-	group := new(Group)
+func New(opts ...Option) *Model {
+	group := new(Model)
 
 	for _, opt := range opts {
 		opt(group)
@@ -71,7 +71,7 @@ func DefaultStyles() *Styles {
 	}
 }
 
-func (g *Group) SetSize(width int, height int) {
+func (g *Model) SetSize(width int, height int) {
 	g.width = width - g.styles.FocusedBorder.GetHorizontalFrameSize()
 	g.height = height
 
@@ -81,23 +81,23 @@ func (g *Group) SetSize(width int, height int) {
 	g.layout.SetSize(width, height)
 }
 
-func (g *Group) Width() int  { return g.width }
-func (g *Group) Height() int { return g.height }
+func (g *Model) Width() int  { return g.width }
+func (g *Model) Height() int { return g.height }
 
-func (g *Group) Current() Groupable {
+func (g *Model) Current() Modelable {
 	return g.items[g.currFocus]
 }
 
-func (g *Group) Blur() {
+func (g *Model) Blur() {
 	g.focused = false
 }
 
-func (g *Group) Focus() tea.Cmd {
+func (g *Model) Focus() tea.Cmd {
 	g.focused = true
 	return g.Current().Focus()
 }
 
-func (g *Group) Init() tea.Cmd {
+func (g *Model) Init() tea.Cmd {
 	var cmds []tea.Cmd
 	for _, c := range g.items {
 		cmds = append(cmds, c.Init())
@@ -108,7 +108,7 @@ func (g *Group) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-func (g *Group) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (g *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
@@ -126,28 +126,28 @@ func (g *Group) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return g, tea.Batch(cmds...)
 }
 
-func (g *Group) View() string {
+func (g *Model) View() string {
 	return g.layout.View()
 }
 
 func WithKeyMap(km KeyMap) Option {
-	return func(g *Group) {
+	return func(g *Model) {
 		g.KeyMap = km
 	}
 }
-func WithItems(items ...Groupable) Option {
-	return func(g *Group) {
+func WithItems(items ...Modelable) Option {
+	return func(g *Model) {
 		g.items = items
 	}
 }
 
 func WithLayout(layout *foam.Layout) Option {
-	return func(g *Group) {
+	return func(g *Model) {
 		g.layout = layout
 	}
 }
 
-func (g *Group) nextFocus() tea.Cmd {
+func (g *Model) nextFocus() tea.Cmd {
 	g.Current().Blur()
 
 	g.currFocus = (g.currFocus + 1) % len(g.items)
@@ -155,7 +155,7 @@ func (g *Group) nextFocus() tea.Cmd {
 	return g.Current().Focus()
 }
 
-func (g *Group) updateComponents(msg tea.Msg) []tea.Cmd {
+func (g *Model) updateComponents(msg tea.Msg) []tea.Cmd {
 	cmds := make([]tea.Cmd, 0)
 
 	for _, item := range g.items {
