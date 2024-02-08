@@ -5,11 +5,13 @@ import (
 	"os"
 
 	"github.com/charmbracelet/bubbles/key"
+
 	foam "github.com/remogatto/sugarfoam"
 	"github.com/remogatto/sugarfoam/components/group"
 	"github.com/remogatto/sugarfoam/components/tabgroup"
 	"github.com/remogatto/sugarfoam/components/table"
 	"github.com/remogatto/sugarfoam/components/textinput"
+	"github.com/remogatto/sugarfoam/components/viewport"
 	"github.com/remogatto/sugarfoam/layout/tiled"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -66,6 +68,13 @@ func initialModel() model {
 		}),
 	)
 
+	viewport := viewport.New(80, 25,
+		viewport.WithStyles(&foam.Styles{
+			Blurred: blurredViewportStyle,
+			Focused: focusedViewportStyle,
+		}),
+	)
+
 	table2 := table.New(
 		table.WithStyles(&foam.Styles{
 			Blurred: blurredTableStyle,
@@ -73,26 +82,19 @@ func initialModel() model {
 		}),
 	)
 
-	table3 := table.New(
-		table.WithStyles(&foam.Styles{
-			Blurred: blurredTableStyle,
-			Focused: focusedTableStyle,
-		}),
-	)
-
 	group1 := group.New(
-		group.WithItems(textinput, table1, table2),
-		group.WithLayout(foam.NewLayout(80, 25).AddItem(textinput).AddItem(tiled.New(80, 25, table1, table2))),
+		group.WithItems(textinput, viewport, table1),
+		group.WithLayout(foam.NewLayout(80, 25).AddItem(textinput).AddItem(tiled.New(80, 25, viewport, table1))),
 	)
 
 	group2 := group.New(
-		group.WithItems(table3),
-		group.WithLayout(foam.NewLayout(80, 25).AddItem(table3)),
+		group.WithItems(table2),
+		group.WithLayout(foam.NewLayout(80, 25).AddItem(table2)),
 	)
 
 	tabgroup := tabgroup.New().
-		AddItem(&tabgroup.TabItem{Title: "Group 1", Group: group1}).
-		AddItem(&tabgroup.TabItem{Title: "Group 2", Group: group2})
+		AddItem(&tabgroup.TabItem{Title: "Group 1", Focusable: group1}).
+		AddItem(&tabgroup.TabItem{Title: "Group 2", Focusable: group2})
 
 	return model{
 		tabgroup: tabgroup,

@@ -3,35 +3,21 @@ package group
 import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	foam "github.com/remogatto/sugarfoam"
 )
 
 type Option func(*Model)
 
-type Modelable interface {
-	tea.Model
-	foam.Placeable
-
-	Focus() tea.Cmd
-	Blur()
-}
-
 type Model struct {
+	foam.Common
+
 	KeyMap KeyMap
 
 	layout *foam.Layout
-	items  []Modelable
+	items  []foam.Focusable
 
-	width, height int
-	styles        *Styles
-	focused       bool
-	currFocus     int
-}
-
-type Styles struct {
-	FocusedBorder lipgloss.Style
-	BlurredBorder lipgloss.Style
+	focused   bool
+	currFocus int
 }
 
 func New(opts ...Option) *Model {
@@ -42,7 +28,8 @@ func New(opts ...Option) *Model {
 	}
 
 	group.KeyMap = DefaultKeyMap()
-	group.styles = DefaultStyles()
+
+	group.SetStyles(foam.DefaultStyles())
 
 	return group
 }
@@ -64,27 +51,12 @@ func DefaultKeyMap() KeyMap {
 	}
 }
 
-func DefaultStyles() *Styles {
-	return &Styles{
-		FocusedBorder: lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("5")),
-		BlurredBorder: lipgloss.NewStyle().Border(lipgloss.RoundedBorder()),
-	}
-}
-
 func (g *Model) SetSize(width int, height int) {
-	g.width = width - g.styles.FocusedBorder.GetHorizontalFrameSize()
-	g.height = height
-
-	g.styles.FocusedBorder = g.styles.FocusedBorder.Width(g.width)
-	g.styles.BlurredBorder = g.styles.BlurredBorder.Width(g.width)
-
+	g.Common.SetSize(width, height)
 	g.layout.SetSize(width, height)
 }
 
-func (g *Model) Width() int  { return g.width }
-func (g *Model) Height() int { return g.height }
-
-func (g *Model) Current() Modelable {
+func (g *Model) Current() foam.Focusable {
 	return g.items[g.currFocus]
 }
 
@@ -135,7 +107,7 @@ func WithKeyMap(km KeyMap) Option {
 		g.KeyMap = km
 	}
 }
-func WithItems(items ...Modelable) Option {
+func WithItems(items ...foam.Focusable) Option {
 	return func(g *Model) {
 		g.items = items
 	}

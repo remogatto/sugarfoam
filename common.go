@@ -33,7 +33,6 @@ func (c *Common) SetSize(width int, height int) {
 
 	c.styles.Focused = c.styles.Focused.Width(c.width)
 	c.styles.Blurred = c.styles.Blurred.Width(c.width)
-
 }
 
 func (c *Common) GetStyles() *Styles { return c.styles }

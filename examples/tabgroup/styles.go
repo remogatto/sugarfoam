@@ -12,9 +12,10 @@ var (
 	blurredTableStyle = foam.DefaultStyles().Blurred.Margin(1)
 	focusedTableStyle = foam.DefaultStyles().Focused.Margin(1)
 
-	headerTableStyle = lipgloss.NewStyle().Bold(true)
+	blurredViewportStyle = foam.DefaultStyles().Blurred.Margin(1)
+	focusedViewportStyle = foam.DefaultStyles().Focused.Margin(1)
 
-	jsonViewportStyle = lipgloss.NewStyle().BorderStyle(lipgloss.RoundedBorder())
+	headerTableStyle = lipgloss.NewStyle().Bold(true)
 
 	infoStyle = lipgloss.NewStyle().Padding(0, 1).Foreground(lipgloss.Color("222"))
 	helpStyle = lipgloss.NewStyle().Padding(1, 1)

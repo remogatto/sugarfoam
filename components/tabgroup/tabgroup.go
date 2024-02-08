@@ -8,7 +8,6 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
 	foam "github.com/remogatto/sugarfoam"
-	"github.com/remogatto/sugarfoam/components/group"
 )
 
 type Option func(*Model)
@@ -25,7 +24,7 @@ type Styles struct {
 }
 
 type TabItem struct {
-	Group *group.Model
+	foam.Focusable
 
 	Title  string
 	Active bool
@@ -96,7 +95,7 @@ func (tg *Model) Init() tea.Cmd {
 	var cmds []tea.Cmd
 
 	for _, item := range tg.items {
-		cmds = append(cmds, item.Group.Init())
+		cmds = append(cmds, item.Focusable.Init())
 	}
 
 	return tea.Batch(cmds...)
@@ -137,7 +136,7 @@ func (tg *Model) SetSize(width int, height int) {
 	tg.styles.Navbar = tg.styles.Navbar.Width(tg.GetWidth())
 
 	for _, item := range tg.items {
-		item.Group.SetSize(tg.GetWidth(), tg.GetHeight())
+		item.Focusable.SetSize(tg.GetWidth(), tg.GetHeight())
 	}
 }
 
@@ -155,7 +154,7 @@ func (tg *Model) View() string {
 	navbar = tg.styles.Navbar.Render(strings.TrimRight(navbar, "• "))
 
 	if len(tg.items) > 0 {
-		return tg.Common.GetStyles().Focused.Render(lipgloss.JoinVertical(lipgloss.Top, navbar, tg.items[tg.currItemIndex].Group.View()))
+		return tg.Common.GetStyles().Focused.Render(lipgloss.JoinVertical(lipgloss.Top, navbar, tg.items[tg.currItemIndex].Focusable.View()))
 	}
 
 	return tg.Common.GetStyles().Focused.Render(navbar)
@@ -178,7 +177,7 @@ func (tg *Model) updateTabItems(msg tea.Msg) []tea.Cmd {
 	cmds := make([]tea.Cmd, 0)
 
 	for _, item := range tg.items {
-		_, cmd := item.Group.Update(msg)
+		_, cmd := item.Focusable.Update(msg)
 		cmds = append(cmds, cmd)
 	}
 
