@@ -44,33 +44,32 @@ viewport := viewport.New()
 // Create a new group with text input, viewport, and table1 elements.
 group1 := group.New(
 	group.WithItems(textinput, viewport, table1),
-		group.WithLayout(
-			layout.New(
-				layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
-				layout.WithItem(tiled.New(viewport, table1)),
-			),
+	group.WithLayout(
+		layout.New(
+			layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
+			layout.WithItem(tiled.New(viewport, table1)),
 		),
-	)
+	),
+)
 
 // Create another group, this time with only table2 element.
 group2 := group.New(
 	group.WithItems(table2),
-		group.WithLayout(
-			layout.New(
-				layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
-				layout.WithItem(table2),
-			),
+	group.WithLayout(
+		layout.New(
+			layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
+			layout.WithItem(table2),
 		),
-	)
+	),
+)
 
 // Organize the groups into a tab group with two tabs.
-	tabGroup := tabgroup.New(
-		tabgroup.WithItems(
-			tabitem.New(group1, tabitem.WithTitle("Tiled layout"), tabitem.WithActive(true)),
-			tabitem.New(group2, tabitem.WithTitle("Single layout")),
-		),
-	)
-
+tabGroup := tabgroup.New(
+	tabgroup.WithItems(
+		tabitem.New(group1, tabitem.WithTitle("Tiled layout"), tabitem.WithActive(true)),
+		tabitem.New(group2, tabitem.WithTitle("Single layout")),
+	),
+)
 ```
 
 # License
