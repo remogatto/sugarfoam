@@ -52,7 +52,7 @@ group1 := group.New(
 	group.WithItems(textinput, viewport, table1),
 	group.WithLayout(
 		layout.New(
-			layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
+			layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 1)}),
 			layout.WithItem(tiled.New(viewport, table1)),
 		),
 	),
@@ -63,7 +63,7 @@ group2 := group.New(
 	group.WithItems(table2),
 	group.WithLayout(
 		layout.New(
-			layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
+			layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 1)}),
 			layout.WithItem(table2),
 		),
 	),
