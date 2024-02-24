@@ -35,6 +35,43 @@ go run .
 
 SugarFoam includes a small library of components that serve as containers for [Bubbles](https://github.com/charmbracelet/bubbletea) models. These components can be organized into groups, and within these groups, a layout can be defined to distribute the components in space.
 
+# Example
+
+```go
+	table1 := table.New()
+	viewport := viewport.New()
+
+  // Create a new group with text input, viewport, and table1 elements.
+	group1 := group.New(
+		group.WithItems(textinput, viewport, table1),
+		group.WithLayout(
+			layout.New(
+				layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
+				layout.WithItem(tiled.New(viewport, table1)),
+			),
+		),
+	)
+
+  // Create another group, this time with only table2 element.
+	group2 := group.New(
+		group.WithItems(table2),
+		group.WithLayout(
+			layout.New(
+				layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
+				layout.WithItem(table2),
+			),
+		),
+	)
+
+  // Organize the groups into a tab group with two tabs.
+	tabGroup := tabgroup.New(
+		tabgroup.WithItems(
+			tabitem.New(group1, tabitem.WithTitle("Tiled layout"), tabitem.WithActive(true)),
+			tabitem.New(group2, tabitem.WithTitle("Single layout")),
+		),
+	)
+
+```
 
 # License
 
