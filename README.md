@@ -35,7 +35,13 @@ go run .
 
 SugarFoam includes a small library of components that serve as containers for [Bubbles](https://github.com/charmbracelet/bubbletea) models. These components can be organized into groups, and within these groups, a layout can be defined to distribute the components in space.
 
-# Example
+# API example
+
+The following snippet demonstrates the creation of two groups of UI elements and organizes them into a tab group.
+
+- **Group Creation**: Two groups (`group1` and `group2`) are created, each containing specific UI elements (`textinput`, `viewport`, `table1`, and `table2`). These elements are arranged within each group using a layout system, with `group1` utilizing a tiled layout for `viewport` and `table1`.
+- **Layout and Styling**: Each group is styled with padding around the container, applied using `lipgloss.NewStyle().Padding(1,  1)`, indicating a padding of  1 unit on the top and bottom, and  0 units on the left and right.
+- **Tab Group Organization**: A tab group (`tabGroup`) is created to organize the two groups into tabs. The first tab contains `group1` and is titled "Tiled layout", set as active by default. The second tab contains `group2` and is titled "Single layout".
 
 ```go
 table1 := table.New()
