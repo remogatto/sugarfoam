@@ -6,12 +6,13 @@ Tea](https://github.com/charmbracelet/bubbletea), aiming to provide a higher-lev
 # Project Status
 
 SugarFoam is in pre-alpha development. APIs are subject to change and not recommended for production use. We welcome feedback and contributions for early development.
+
 # Features
 
 - High-level API based on [Bubble
-Tea](https://github.com/charmbracelet/bubbletea) for building TUI applications
-- Idiomatic approach to building applications that preserves the architecture inspired by [Elm](https://guide.elm-lang.org/architecture/)
-- Ability to define layouts for rendering components
+Tea](https://github.com/charmbracelet/bubbletea) for building TUI applications.
+- Idiomatic approach to building applications that preserves the architecture inspired by [Elm](https://guide.elm-lang.org/architecture/).
+- Customizable layouts to easily define layouts for rendering components.
 
 # Quickstart
 
