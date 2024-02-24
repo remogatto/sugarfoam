@@ -3,6 +3,9 @@
 SugarFoam is a library written in Go, based on the delightful [Bubble
 Tea](https://github.com/charmbracelet/bubbletea), aiming to provide a higher-level API compared to the latter. With SugarFoam, it is possible to develop TUI applications that present organized components in layouts. Compared to `BubbleTea`, it tries to save a bit of boilerplate code, especially if you want to develop applications that present articulated components such as tabgroup, statusbar, etc.
 
+# Project Status
+
+SugarFoam is in pre-alpha development. APIs are subject to change and not recommended for production use. We welcome feedback and contributions for early development.
 # Features
 
 - High-level API based on [Bubble
@@ -10,9 +13,22 @@ Tea](https://github.com/charmbracelet/bubbletea) for building TUI applications
 - Idiomatic approach to building applications that preserves the architecture inspired by [Elm](https://guide.elm-lang.org/architecture/)
 - Ability to define layouts for rendering components
 
-## Project Status
+# Quickstart
 
-SugarFoam is in pre-alpha development. APIs are subject to change and not recommended for production use. We welcome feedback and contributions for early development.
+To get started with SugarFoam, follow these steps:
+
+1. **Clone the Repository**:
+
+```bash
+git clone github.com/remogatto/sugarfoam
+```
+
+2. **Explore the examples/ folder**:
+
+```bash
+cd sugarfoam/examples/tabgroup
+go run .
+```
 
 # License
 
