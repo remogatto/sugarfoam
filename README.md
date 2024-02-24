@@ -31,6 +31,11 @@ cd sugarfoam/examples/tabgroup
 go run .
 ```
 
+# Components and layout
+
+SugarFoam includes a small library of components that serve as containers for [Bubbles](https://github.com/charmbracelet/bubbletea)) models. These components can be organized into groups, and within these groups, a layout can be defined to distribute the components in space.
+
+
 # License
 
 Copyright © 2024 Andrea Fazzi
