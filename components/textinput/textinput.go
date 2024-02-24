@@ -1,6 +1,7 @@
 package textinput
 
 import (
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	foam "github.com/remogatto/sugarfoam"
@@ -59,4 +60,8 @@ func (ti *Model) View() string {
 		return ti.GetStyles().Focused.Render(ti.Model.View())
 	}
 	return ti.GetStyles().Blurred.Render(ti.Model.View())
+}
+
+func (m *Model) KeyBindings() (map[string]key.Binding, error) {
+	return nil, nil
 }

@@ -2,12 +2,12 @@ package tiled
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	foam "github.com/remogatto/sugarfoam"
+	"github.com/remogatto/sugarfoam/layout"
 )
 
 type HorizontalTile struct {
 	width, height int
-	items         []foam.Placeable
+	items         []layout.Placeable
 }
 
 func (ht *HorizontalTile) View() string {
@@ -36,6 +36,6 @@ func (ht *HorizontalTile) SetSize(width int, height int) {
 func (ht *HorizontalTile) GetWidth() int  { return ht.width }
 func (ht *HorizontalTile) GetHeight() int { return ht.height }
 
-func New(width int, height int, items ...foam.Placeable) *HorizontalTile {
+func New(width int, height int, items ...layout.Placeable) *HorizontalTile {
 	return &HorizontalTile{width, height, items}
 }

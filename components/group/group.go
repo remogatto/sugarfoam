@@ -4,6 +4,7 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	tea "github.com/charmbracelet/bubbletea"
 	foam "github.com/remogatto/sugarfoam"
+	"github.com/remogatto/sugarfoam/layout"
 )
 
 type Option func(*Model)
@@ -13,7 +14,7 @@ type Model struct {
 
 	KeyMap KeyMap
 
-	layout *foam.Layout
+	layout *layout.Layout
 	items  []foam.Focusable
 
 	focused   bool
@@ -107,15 +108,16 @@ func WithKeyMap(km KeyMap) Option {
 		g.KeyMap = km
 	}
 }
+
 func WithItems(items ...foam.Focusable) Option {
 	return func(g *Model) {
 		g.items = items
 	}
 }
 
-func WithLayout(layout *foam.Layout) Option {
-	return func(g *Model) {
-		g.layout = layout
+func WithLayout(layout *layout.Layout) Option {
+	return func(m *Model) {
+		m.layout = layout
 	}
 }
 

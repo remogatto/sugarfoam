@@ -5,8 +5,9 @@ import (
 )
 
 type Styles struct {
-	Focused lipgloss.Style
-	Blurred lipgloss.Style
+	Focused  lipgloss.Style
+	Blurred  lipgloss.Style
+	NoBorder lipgloss.Style
 }
 
 type Common struct {
@@ -16,8 +17,9 @@ type Common struct {
 
 func DefaultStyles() *Styles {
 	return &Styles{
-		Focused: lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("5")),
-		Blurred: lipgloss.NewStyle().Border(lipgloss.RoundedBorder()),
+		Focused:  lipgloss.NewStyle().Border(lipgloss.RoundedBorder()).BorderForeground(lipgloss.Color("5")),
+		Blurred:  lipgloss.NewStyle().Border(lipgloss.RoundedBorder()),
+		NoBorder: lipgloss.NewStyle(),
 	}
 }
 

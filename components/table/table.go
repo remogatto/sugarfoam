@@ -7,15 +7,15 @@ import (
 	foam "github.com/remogatto/sugarfoam"
 )
 
-type Option func(*Table)
+type Option func(*Model)
 
-type Table struct {
+type Model struct {
 	foam.Common
 
 	*table.Model
 }
 
-func New(opts ...Option) *Table {
+func New(opts ...Option) *Model {
 	t := table.New(
 		table.WithColumns(
 			[]table.Column{
@@ -34,7 +34,7 @@ func New(opts ...Option) *Table {
 		),
 	)
 
-	ti := &Table{
+	ti := &Model{
 		Model: &t,
 	}
 
@@ -60,26 +60,34 @@ func New(opts ...Option) *Table {
 }
 
 func WithStyles(styles *foam.Styles) Option {
-	return func(ti *Table) {
+	return func(ti *Model) {
 		ti.Common.SetStyles(styles)
 	}
 }
 
-func (t *Table) Focus() tea.Cmd {
+func (t *Model) Focus() tea.Cmd {
 	t.Model.Focus()
 
 	return nil
 }
 
-func (t *Table) Blur() {
+func (t *Model) Blur() {
 	t.Model.Blur()
 }
 
-func (t *Table) Init() tea.Cmd {
+func (t *Model) SetHeight(h int) {
+	t.Model.SetHeight(h)
+
+	hh := lipgloss.Height(t.Model.View()) - h
+
+	t.Model.SetHeight(h - hh)
+}
+
+func (t *Model) Init() tea.Cmd {
 	return nil
 }
 
-func (t *Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (t *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	table, cmd := t.Model.Update(msg)
 
 	t.Model = &table
@@ -87,11 +95,11 @@ func (t *Table) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return t, cmd
 }
 
-func (t *Table) View() string {
+func (t *Model) View() string {
 	if t.Focused() {
 		return t.GetStyles().Focused.Render(t.Model.View())
 	}
 	return t.GetStyles().Blurred.Render(t.Model.View())
 }
 
-func (t *Table) String() string { return t.View() }
+func (t *Model) String() string { return t.View() }

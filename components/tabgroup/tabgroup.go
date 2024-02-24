@@ -12,6 +12,12 @@ import (
 
 type Option func(*Model)
 
+func WithItems(items ...foam.Tabbable) Option {
+	return func(m *Model) {
+		m.items = items
+	}
+}
+
 type KeyMap struct {
 	TabNext key.Binding
 	TabPrev key.Binding
@@ -23,19 +29,12 @@ type Styles struct {
 	NavbarTitleSelected   lipgloss.Style
 }
 
-type TabItem struct {
-	foam.Focusable
-
-	Title  string
-	Active bool
-}
-
 type Model struct {
 	foam.Common
 
 	KeyMap KeyMap
 
-	items         []*TabItem
+	items         []foam.Tabbable
 	currItemIndex int
 
 	focused bool
@@ -56,7 +55,7 @@ func DefaultKeyMap() KeyMap {
 
 func New(opts ...Option) *Model {
 	tg := &Model{
-		items: make([]*TabItem, 0),
+		items: make([]foam.Tabbable, 0),
 	}
 
 	tg.KeyMap = DefaultKeyMap()
@@ -64,14 +63,18 @@ func New(opts ...Option) *Model {
 	tg.Common.SetStyles(foam.DefaultStyles())
 	tg.styles = DefaultStyles()
 
+	for _, opt := range opts {
+		opt(tg)
+	}
+
 	return tg
 }
 
-func (tg *Model) Items() []*TabItem {
+func (tg *Model) Items() []foam.Tabbable {
 	return tg.items
 }
 
-func (tg *Model) AddItem(item *TabItem) *Model {
+func (tg *Model) AddItem(item foam.Tabbable) *Model {
 	tg.items = append(tg.items, item)
 
 	return tg
@@ -79,7 +82,7 @@ func (tg *Model) AddItem(item *TabItem) *Model {
 
 func DefaultStyles() *Styles {
 	return &Styles{
-		Navbar: lipgloss.NewStyle().Padding(0, 1, 0, 1),
+		Navbar: lipgloss.NewStyle().Padding(1, 1, 0, 1),
 		NavbarTitleUnselected: lipgloss.NewStyle().
 			Background(lipgloss.Color("#373B41")).
 			Foreground(lipgloss.Color("240")).
@@ -95,7 +98,7 @@ func (tg *Model) Init() tea.Cmd {
 	var cmds []tea.Cmd
 
 	for _, item := range tg.items {
-		cmds = append(cmds, item.Focusable.Init())
+		cmds = append(cmds, item.Init())
 	}
 
 	return tea.Batch(cmds...)
@@ -136,7 +139,7 @@ func (tg *Model) SetSize(width int, height int) {
 	tg.styles.Navbar = tg.styles.Navbar.Width(tg.GetWidth())
 
 	for _, item := range tg.items {
-		item.Focusable.SetSize(tg.GetWidth(), tg.GetHeight())
+		item.SetSize(tg.GetWidth(), tg.GetHeight())
 	}
 }
 
@@ -144,9 +147,9 @@ func (tg *Model) View() string {
 	var navbar string
 
 	for i, item := range tg.Items() {
-		tabTitle := tg.styles.NavbarTitleUnselected.Render(item.Title)
+		tabTitle := tg.styles.NavbarTitleUnselected.Render(item.Title())
 		if tg.currItemIndex == i {
-			tabTitle = tg.styles.NavbarTitleSelected.Render(item.Title)
+			tabTitle = tg.styles.NavbarTitleSelected.Render(item.Title())
 		}
 		navbar += fmt.Sprintf("%s • ", tabTitle)
 	}
@@ -154,11 +157,15 @@ func (tg *Model) View() string {
 	navbar = tg.styles.Navbar.Render(strings.TrimRight(navbar, "• "))
 
 	if len(tg.items) > 0 {
-		return tg.Common.GetStyles().Focused.Render(lipgloss.JoinVertical(lipgloss.Top, navbar, tg.items[tg.currItemIndex].Focusable.View()))
+		return tg.Common.GetStyles().NoBorder.Render(lipgloss.JoinVertical(lipgloss.Top, navbar, tg.items[tg.currItemIndex].View()))
 	}
 
 	return tg.Common.GetStyles().Focused.Render(navbar)
 
+}
+
+func (m *Model) Current() foam.Tabbable {
+	return m.items[m.currItemIndex]
 }
 
 func (tg *Model) nextTab() {
@@ -177,7 +184,7 @@ func (tg *Model) updateTabItems(msg tea.Msg) []tea.Cmd {
 	cmds := make([]tea.Cmd, 0)
 
 	for _, item := range tg.items {
-		_, cmd := item.Focusable.Update(msg)
+		_, cmd := item.Update(msg)
 		cmds = append(cmds, cmd)
 	}
 
