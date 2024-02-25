@@ -1,5 +1,7 @@
 # SugarFoam
 
+![immagine](https://github.com/remogatto/sugarfoam/assets/22067/c87fca22-65bf-4492-aebd-e5b739a7b7c8)
+
 SugarFoam is a library written in Go, based on the delightful [Bubble
 Tea](https://github.com/charmbracelet/bubbletea), aiming to provide a higher-level API compared to the latter. 
 
