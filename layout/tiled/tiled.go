@@ -5,6 +5,11 @@ import (
 	"github.com/remogatto/sugarfoam/layout"
 )
 
+var (
+	DefaultWidth  = 80
+	DefaultHeight = 25
+)
+
 type HorizontalTile struct {
 	width, height int
 	items         []layout.Placeable
@@ -36,6 +41,6 @@ func (ht *HorizontalTile) SetSize(width int, height int) {
 func (ht *HorizontalTile) GetWidth() int  { return ht.width }
 func (ht *HorizontalTile) GetHeight() int { return ht.height }
 
-func New(width int, height int, items ...layout.Placeable) *HorizontalTile {
-	return &HorizontalTile{width, height, items}
+func New(items ...layout.Placeable) *HorizontalTile {
+	return &HorizontalTile{DefaultWidth, DefaultHeight, items}
 }

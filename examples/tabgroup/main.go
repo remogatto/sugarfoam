@@ -110,7 +110,7 @@ func initialModel() model {
 			layout.New(
 				layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
 				layout.WithItem(textinput),
-				layout.WithItem(tiled.New(80, 25, viewport, table1)),
+				layout.WithItem(tiled.New(viewport, table1)),
 			),
 		),
 	)
