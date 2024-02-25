@@ -1,6 +1,7 @@
 # SugarFoam
 
 ![immagine](https://github.com/remogatto/sugarfoam/assets/22067/c87fca22-65bf-4492-aebd-e5b739a7b7c8)
+
 [![Go Reference](https://pkg.go.dev/badge/github.com/remogatto/sugarfoam.svg)](https://pkg.go.dev/github.com/remogatto/sugarfoam)
 
 SugarFoam is a library written in Go, based on the delightful [Bubble
