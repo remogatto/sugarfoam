@@ -1,20 +1,29 @@
 package viewport
 
+// Package viewport provides a viewport model for managing scrollable
+// content within a UI.  It integrates with the Bubble Tea framework
+// and the SugarFoam UI framework to offer a flexible and customizable
+// scrolling experience. The package supports styling and key bindings
+// to enhance the user interaction with the viewport.
 import (
-	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	foam "github.com/remogatto/sugarfoam"
-	"github.com/remogatto/sugarfoam/keys"
 )
 
+// DefaultWidth and DefaultHeight define the default dimensions for
+// the viewport.
 var (
 	DefaultWidth  = 80
 	DefaultHeight = 25
 )
 
+// Option is a type for functions that modify a viewport model.
 type Option func(*Model)
 
+// Model wraps the Bubble Tea viewport model with additional
+// functionality and styling options provided by the Sugarfoam
+// framework.
 type Model struct {
 	foam.Common
 	*viewport.Model
@@ -22,6 +31,7 @@ type Model struct {
 	focused bool
 }
 
+// New creates a new viewport model with optional configurations.
 func New(opts ...Option) *Model {
 	vp := viewport.New(DefaultWidth, DefaultHeight)
 
@@ -36,19 +46,22 @@ func New(opts ...Option) *Model {
 	}
 
 	return v
-
 }
 
+// WithStyles sets the styles for the viewport using the provided
+// styles.
 func WithStyles(styles *foam.Styles) Option {
 	return func(m *Model) {
 		m.SetStyles(styles)
 	}
 }
 
+// Init initializes the viewport model.
 func (m *Model) Init() tea.Cmd {
 	return nil
 }
 
+// Update updates the viewport model based on the received message.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	t, cmd := m.Model.Update(msg)
 	m.Model = &t
@@ -56,28 +69,25 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// Focused returns the focus state of the viewport.
 func (m *Model) Focused() bool {
 	return m.focused
 }
 
+// Blur removes focus from the viewport.
 func (m *Model) Blur() {
 	m.focused = false
 }
 
+// Focus sets the viewport to be focused.
 func (m *Model) Focus() tea.Cmd {
 	m.focused = true
 
 	return nil
 }
 
-func (m *Model) KeyBindings() (map[string]key.Binding, error) {
-	kb, err := keys.KeyMapToMap("viewport", m.KeyMap)
-	if err != nil {
-		return nil, err
-	}
-	return kb, nil
-}
-
+// View renders the viewport model, applying the appropriate style
+// based on focus state.
 func (m *Model) View() string {
 	if m.Focused() {
 		return m.GetStyles().Focused.Render(m.Model.View())
