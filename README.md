@@ -5,6 +5,7 @@
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/remogatto/sugarfoam.svg)](https://pkg.go.dev/github.com/remogatto/sugarfoam)
 [![Build Status](https://github.com/remogatto/sugarfoam/workflows/build/badge.svg)](https://github.com/remogatto/sugarfoam/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/remogatto/sugarfoam)](https://goreportcard.com/report/github.com/remogatto/sugarfoam)
 
 SugarFoam is a library written in Go, based on the delightful [Bubble
 Tea](https://github.com/charmbracelet/bubbletea), aiming to provide a higher-level API compared to the latter. 
