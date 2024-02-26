@@ -133,7 +133,7 @@ func initialModel() model {
 	)
 
 	bindings := newBindings(tabGroup)
-	statusBar := statusbar.New(bindings, statusbar.WithStatus())
+	statusBar := statusbar.New(bindings)
 
 	header := header.New(
 		header.WithContent(
@@ -171,9 +171,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
 	switch msg := msg.(type) {
-
-	case loadCompleted:
-		m.loadcompleted = true
 
 	case tea.WindowSizeMsg:
 		m.document.SetSize(msg.Width, msg.Height)
