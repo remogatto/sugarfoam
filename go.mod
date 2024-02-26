@@ -1,6 +1,6 @@
 module github.com/remogatto/sugarfoam
 
-go 1.22
+go 1.18
 
 require (
 	github.com/charmbracelet/bubbles v0.18.0
