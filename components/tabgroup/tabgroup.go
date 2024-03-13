@@ -113,6 +113,7 @@ func (tg *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, tg.KeyMap.TabNext):
 			tg.nextTab()
+
 		case key.Matches(msg, tg.KeyMap.TabPrev):
 			tg.prevTab()
 		}
@@ -168,8 +169,14 @@ func (m *Model) Current() foam.Tabbable {
 	return m.items[m.currItemIndex]
 }
 
+func (m *Model) CanGrow() bool {
+	return true
+}
+
 func (tg *Model) nextTab() {
 	tg.currItemIndex = (tg.currItemIndex + 1) % len(tg.items)
+
+	tg.Current().SetSize(tg.GetWidth(), tg.GetHeight())
 }
 
 func (tg *Model) prevTab() {
@@ -178,6 +185,7 @@ func (tg *Model) prevTab() {
 	if tg.currItemIndex < 0 {
 		tg.currItemIndex = len(tg.items) - 1
 	}
+	tg.Current().SetSize(tg.GetWidth(), tg.GetHeight())
 }
 
 func (tg *Model) updateTabItems(msg tea.Msg) []tea.Cmd {

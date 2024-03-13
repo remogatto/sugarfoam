@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/charmbracelet/bubbles/help"
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/lipgloss"
 
+	foam "github.com/remogatto/sugarfoam"
 	"github.com/remogatto/sugarfoam/components/group"
 	"github.com/remogatto/sugarfoam/components/header"
+	"github.com/remogatto/sugarfoam/components/help"
 	"github.com/remogatto/sugarfoam/components/statusbar"
 	"github.com/remogatto/sugarfoam/components/tabgroup"
 	"github.com/remogatto/sugarfoam/components/tabgroup/tabitem"
@@ -25,15 +25,12 @@ import (
 
 type model struct {
 	tabGroup  *tabgroup.Model
-	help      help.Model
+	help      *help.Model
 	statusBar *statusbar.Model
-	spinner   spinner.Model
 
 	document *layout.Layout
 
 	bindings *keyBindings
-
-	loadCompleted bool
 }
 
 type keyBindings struct {
@@ -98,17 +95,16 @@ func initialModel() model {
 	)
 
 	table1 := table.New()
-	table1.SetHeight(25)
+	// table1.SetHeight(25)
 
 	viewport := viewport.New()
 	table2 := table.New()
-	help := help.New()
 
 	group1 := group.New(
 		group.WithItems(textinput, viewport, table1),
 		group.WithLayout(
 			layout.New(
-				layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
+				layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 1)}),
 				layout.WithItem(textinput),
 				layout.WithItem(tiled.New(viewport, table1)),
 			),
@@ -119,7 +115,7 @@ func initialModel() model {
 		group.WithItems(table2),
 		group.WithLayout(
 			layout.New(
-				layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 0, 1, 0)}),
+				layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(1, 1)}),
 				layout.WithItem(table2),
 			),
 		),
@@ -133,7 +129,7 @@ func initialModel() model {
 	)
 
 	bindings := newBindings(tabGroup)
-	statusBar := statusbar.New(bindings)
+	statusBar := statusbar.New(bindings, statusbar.WithContent("Idle", "Some text here", "ONLINE"))
 
 	header := header.New(
 		header.WithContent(
@@ -141,10 +137,15 @@ func initialModel() model {
 		),
 	)
 
+	help := help.New(
+		bindings,
+		help.WithStyles(&foam.Styles{NoBorder: lipgloss.NewStyle().Padding(1, 1)}))
+
 	document := layout.New(
-		layout.WithStyles(&layout.Styles{Container: docStyle}),
+		layout.WithStyles(&layout.Styles{Container: lipgloss.NewStyle().Padding(2)}),
 		layout.WithItem(header),
 		layout.WithItem(tabGroup),
+		layout.WithItem(help),
 		layout.WithItem(statusBar),
 	)
 
@@ -194,7 +195,16 @@ func (m model) View() string {
 }
 
 func main() {
-	if _, err := tea.NewProgram(initialModel()).Run(); err != nil {
+	if len(os.Getenv("DEBUG")) > 0 {
+		f, err := tea.LogToFile("debug.log", "debug")
+		if err != nil {
+			fmt.Println("fatal:", err)
+			os.Exit(1)
+		}
+		defer f.Close()
+	}
+
+	if _, err := tea.NewProgram(initialModel() /*tea.WithAltScreen()*/).Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
 	}

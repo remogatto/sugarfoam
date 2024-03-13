@@ -54,7 +54,7 @@ func DefaultKeyMap() KeyMap {
 
 func (g *Model) SetSize(width int, height int) {
 	g.Common.SetSize(width, height)
-	g.layout.SetSize(width, height)
+	g.layout.SetSize(g.GetWidth(), g.GetHeight())
 }
 
 func (g *Model) Current() foam.Focusable {
@@ -101,6 +101,10 @@ func (g *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (g *Model) View() string {
 	return g.layout.View()
+}
+
+func (m *Model) CanGrow() bool {
+	return true
 }
 
 func WithKeyMap(km KeyMap) Option {

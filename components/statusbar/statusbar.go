@@ -16,17 +16,17 @@ func WithStyles(styles *foam.Styles) Option {
 	}
 }
 
-func WithContent(text string) Option {
+func WithContent(left, center, right string) Option {
 	return func(sb *Model) {
-		sb.content = text
+		sb.left, sb.center, sb.right = left, center, right
 	}
 }
 
 type Model struct {
 	foam.Common
 
-	content  string
-	bindings help.KeyMap
+	left, center, right string
+	bindings            help.KeyMap
 }
 
 func New(bindings help.KeyMap, opts ...Option) *Model {
@@ -41,28 +41,41 @@ func New(bindings help.KeyMap, opts ...Option) *Model {
 	return m
 }
 
-func (m *Model) SetContent(text string) {
-	m.content = text
+func (m *Model) SetContent(left, center, right string) {
+	m.left, m.center, m.right = left, center, right
 }
 
 func (m *Model) View() string {
 	doc := strings.Builder{}
+
 	w := lipgloss.Width
 
-	statusKey := statusStyle.Render("STATUS")
-	encoding := encodingStyle.Render("UTF-8")
-	fishCake := fishCakeStyle.Render("🍥 Fish Cake")
-	statusVal := statusText.Copy().
-		Width(m.GetWidth() - w(statusKey) - w(encoding) - w(fishCake) - m.GetStyles().NoBorder.GetHorizontalFrameSize()).
-		Render(m.content)
+	frameSizes := leftStyle.GetHorizontalFrameSize() +
+		centerStyle.GetHorizontalFrameSize() +
+		rightStyle.GetHorizontalBorderSize() +
+		m.GetStyles().NoBorder.GetHorizontalFrameSize()
+
+	statusKey := statusStyle.Render(m.left)
+	right := rightStyle.Render(m.right)
+	statusVal := centerStyle.Copy().
+		Width(m.GetWidth() - w(m.left) - w(m.right) - frameSizes).
+		Render(m.center)
 
 	bar := lipgloss.JoinHorizontal(lipgloss.Top,
 		statusKey,
 		statusVal,
-		encoding,
-		fishCake,
+		right,
 	)
 
-	doc.WriteString(statusBarStyle.Render(bar))
+	doc.WriteString(centerStyle.Render(bar))
+
 	return m.GetStyles().NoBorder.Render(doc.String())
+}
+
+func (m *Model) CanGrow() bool {
+	return false
+}
+
+func (m *Model) GetHeight() int {
+	return lipgloss.Height(m.View())
 }

@@ -7,6 +7,7 @@ package textinput
 import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	foam "github.com/remogatto/sugarfoam"
 )
 
@@ -75,4 +76,12 @@ func (ti *Model) View() string {
 		return ti.GetStyles().Focused.Render(ti.Model.View())
 	}
 	return ti.GetStyles().Blurred.Render(ti.Model.View())
+}
+
+func (m *Model) CanGrow() bool {
+	return false
+}
+
+func (m *Model) GetHeight() int {
+	return lipgloss.Height(m.View())
 }

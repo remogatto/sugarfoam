@@ -52,3 +52,7 @@ func WithGroup(group *group.Model) Option {
 		m.Model = group
 	}
 }
+
+func (m *Model) CanGrow() bool {
+	return true
+}

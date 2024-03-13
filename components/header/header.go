@@ -1,6 +1,7 @@
 package header
 
 import (
+	"github.com/charmbracelet/lipgloss"
 	foam "github.com/remogatto/sugarfoam"
 )
 
@@ -32,4 +33,12 @@ func New(opts ...Option) *Model {
 
 func (m *Model) View() string {
 	return m.Common.GetStyles().NoBorder.Render(m.content)
+}
+
+func (m *Model) CanGrow() bool {
+	return false
+}
+
+func (m *Model) GetHeight() int {
+	return lipgloss.Height(m.View())
 }

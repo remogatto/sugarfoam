@@ -40,19 +40,32 @@ func (c *Common) GetWidth() int { return c.width }
 func (c *Common) GetHeight() int { return c.height }
 
 // SetWidth sets the width of the UI component.
-func (c *Common) SetWidth(width int) { c.width = width }
+func (c *Common) SetWidth(width int) {
+	c.width = width - c.styles.Focused.GetHorizontalFrameSize()
+	c.styles.Focused = c.styles.Focused.Width(c.width)
+	c.styles.Blurred = c.styles.Blurred.Width(c.width)
+}
 
 // SetHeight sets the height of the UI component.
-func (c *Common) SetHeight(height int) { c.height = height }
+func (c *Common) SetHeight(height int) {
+	// c.height = height
+	c.height = height - c.styles.Focused.GetHorizontalFrameSize()
+	c.styles.Focused = c.styles.Focused.Height(c.height)
+	c.styles.Blurred = c.styles.Blurred.Height(c.height)
+
+}
 
 // SetSize sets the width and height of the UI component, adjusting
 // the focused style width to account for the border size.
 func (c *Common) SetSize(width int, height int) {
 	c.width = width - c.styles.Focused.GetHorizontalFrameSize()
-	c.height = height
+	c.height = height - c.styles.Focused.GetVerticalFrameSize()
 
 	c.styles.Focused = c.styles.Focused.Width(c.width)
+	c.styles.Focused = c.styles.Focused.Height(c.height)
+
 	c.styles.Blurred = c.styles.Blurred.Width(c.width)
+	c.styles.Blurred = c.styles.Blurred.Height(c.height)
 }
 
 // GetStyles returns the current styles of the UI component.

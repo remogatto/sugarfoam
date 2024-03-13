@@ -8,6 +8,7 @@ package viewport
 import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 	foam "github.com/remogatto/sugarfoam"
 )
 
@@ -84,6 +85,35 @@ func (m *Model) Focus() tea.Cmd {
 	m.focused = true
 
 	return nil
+}
+
+func (m *Model) CanGrow() bool {
+	return true
+}
+
+func (m *Model) GetHeight() int {
+	return lipgloss.Height(m.View())
+}
+
+func (t *Model) SetWidth(width int) {
+	t.Model.Width = width
+	ww := lipgloss.Width(t.Model.View()) - width
+	t.Model.Width = width - ww
+}
+
+func (t *Model) SetHeight(height int) {
+	t.Model.Height = height
+
+	hh := lipgloss.Height(t.Model.View()) - height
+
+	t.Model.Height = height - hh
+}
+
+func (t *Model) SetSize(w, h int) {
+	t.Common.SetSize(w, h)
+
+	t.SetWidth(w)
+	t.SetHeight(h)
 }
 
 // View renders the viewport model, applying the appropriate style

@@ -5,6 +5,8 @@ package layout
 // for styling and resizing. The package is designed to work with the Lipgloss library
 // for styling, providing a visually appealing interface.
 import (
+	"log"
+
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -34,8 +36,11 @@ func WithStyles(styles *Styles) Option {
 // Sizeable is an interface for components that can be resized.
 type Sizeable interface {
 	SetSize(width int, height int)
+	SetWidth(width int)
+	SetHeight(height int)
 	GetWidth() int
 	GetHeight() int
+	CanGrow() bool
 }
 
 // Placeable is an interface for components that can be placed within a layout.
@@ -83,10 +88,40 @@ func (l *Layout) Items() []Placeable {
 	return l.items
 }
 
-// SetSize resizes the layout and its items, adjusting for container styling.
-func (l *Layout) SetSize(width int, height int) {
+func (l *Layout) calcVerticalGrowth(w, h int, items ...Placeable) int {
+	var staticItemsH, canGrowItemsH, nCanGrowItems, nStaticItems int
+
 	for _, item := range l.items {
-		item.SetSize(width-l.styles.Container.GetHorizontalFrameSize(), height-l.styles.Container.GetVerticalFrameSize())
+		if item.CanGrow() {
+			canGrowItemsH += item.GetHeight()
+			nCanGrowItems++
+		} else {
+			staticItemsH += item.GetHeight()
+			nStaticItems++
+		}
+	}
+
+	return (h - staticItemsH) / nCanGrowItems
+}
+
+// SetSize resizes the layout and its items.
+func (l *Layout) SetSize(width int, height int) {
+	w := width - l.styles.Container.GetHorizontalFrameSize()
+	h := height - l.styles.Container.GetVerticalFrameSize()
+
+	for i, item := range l.items {
+		if i == 3 {
+			log.Println("Status W", w)
+		}
+		item.SetWidth(w)
+	}
+
+	canGrowHeight := l.calcVerticalGrowth(w, h, l.items...)
+
+	for _, item := range l.items {
+		if item.CanGrow() {
+			item.SetSize(w, canGrowHeight)
+		}
 	}
 }
 

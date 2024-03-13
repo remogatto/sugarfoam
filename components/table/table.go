@@ -11,31 +11,23 @@ type Option func(*Model)
 
 type Model struct {
 	foam.Common
-
 	*table.Model
+
+	RelWidths []int
 }
 
 func New(opts ...Option) *Model {
-	t := table.New(
-		table.WithColumns(
-			[]table.Column{
-				{Title: "Col1", Width: 10},
-				{Title: "Col2", Width: 10},
-				{Title: "Col3", Width: 10},
-			},
-		),
-		table.WithRows(
-			[]table.Row{
-				[]string{"Cell 11", "Cell 12", "Cell 13"},
-				[]string{"Cell 21", "Cell 22", "Cell 23"},
-				[]string{"Cell 31", "Cell 32", "Cell 33"},
-				[]string{"Cell 41", "Cell 42", "Cell 43"},
-			},
-		),
-	)
+	t := table.New()
+
+	relWidths := make([]int, len(t.Columns()))
+
+	for i := range t.Columns() {
+		relWidths[i] = 100
+	}
 
 	ti := &Model{
-		Model: &t,
+		Model:     &t,
+		RelWidths: relWidths,
 	}
 
 	ti.Common.SetStyles(foam.DefaultStyles())
@@ -59,6 +51,13 @@ func New(opts ...Option) *Model {
 	return ti
 }
 
+func WithRelWidths(percentages ...int) Option {
+	return func(m *Model) {
+		m.RelWidths = make([]int, 0)
+		m.RelWidths = append(m.RelWidths, percentages...)
+	}
+}
+
 func WithStyles(styles *foam.Styles) Option {
 	return func(ti *Model) {
 		ti.Common.SetStyles(styles)
@@ -75,12 +74,42 @@ func (t *Model) Blur() {
 	t.Model.Blur()
 }
 
+func (t *Model) SetWidth(width int) {
+	t.Model.SetWidth(width)
+
+	ww := lipgloss.Width(t.Model.View()) - width
+	availableW := width - ww
+
+	t.Model.SetWidth(availableW)
+
+	cols := make([]table.Column, 0)
+
+	for i, col := range t.Model.Columns() {
+		colW := availableW * t.RelWidths[i] / 100
+		col.Width = colW - table.DefaultStyles().Cell.GetHorizontalFrameSize() - 1
+		cols = append(cols, col)
+	}
+
+	t.Model.SetColumns(cols)
+}
+
 func (t *Model) SetHeight(h int) {
 	t.Model.SetHeight(h)
 
 	hh := lipgloss.Height(t.Model.View()) - h
 
 	t.Model.SetHeight(h - hh)
+}
+
+func (t *Model) SetSize(w, h int) {
+	t.Common.SetSize(w, h)
+
+	t.SetWidth(w)
+	t.SetHeight(h)
+}
+
+func (m *Model) GetHeight() int {
+	return lipgloss.Height(m.View())
 }
 
 func (t *Model) Init() tea.Cmd {
@@ -102,4 +131,6 @@ func (t *Model) View() string {
 	return t.GetStyles().Blurred.Render(t.Model.View())
 }
 
-func (t *Model) String() string { return t.View() }
+func (m *Model) CanGrow() bool {
+	return true
+}
