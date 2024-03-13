@@ -20,6 +20,7 @@ import (
 	"github.com/remogatto/sugarfoam/layout/tiled"
 )
 
+// Application states.
 const (
 	GotConnectionState = iota
 	GotResponseState
@@ -28,6 +29,7 @@ const (
 	BrowseState
 )
 
+// characterTpl is a template for displaying character information.
 const characterTpl = `
 * **ID**: %s
 * **Name**: %s
@@ -37,6 +39,7 @@ const characterTpl = `
 %s
 `
 
+// model represents the application state.
 type model struct {
 	group     *group.Model
 	statusBar *statusbar.Model
@@ -54,11 +57,13 @@ type model struct {
 	state int
 }
 
+// keyBindings holds the key bindings for the application.
 type keyBindings struct {
 	group *group.Model
 	quit  key.Binding
 }
 
+// ShortHelp returns a list of key bindings for the current state.
 func (k *keyBindings) ShortHelp() []key.Binding {
 	keys := make([]key.Binding, 0)
 
@@ -81,6 +86,7 @@ func (k *keyBindings) ShortHelp() []key.Binding {
 	return keys
 }
 
+// FullHelp returns a list of all key bindings.
 func (k keyBindings) FullHelp() [][]key.Binding {
 	return [][]key.Binding{
 		{
@@ -89,6 +95,7 @@ func (k keyBindings) FullHelp() [][]key.Binding {
 	}
 }
 
+// newBindings creates a new set of key bindings for the application.
 func newBindings(group *group.Model) *keyBindings {
 	return &keyBindings{
 		group: group,
@@ -98,6 +105,7 @@ func newBindings(group *group.Model) *keyBindings {
 	}
 }
 
+// initialModel initializes the application model.
 func initialModel() model {
 	viewport := viewport.New()
 
@@ -161,6 +169,7 @@ func initialModel() model {
 	}
 }
 
+// Init initializes the application.
 func (m model) Init() tea.Cmd {
 	var cmds []tea.Cmd
 
@@ -171,6 +180,7 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
+// Update updates the application state based on messages.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 
@@ -209,11 +219,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, tea.Batch(append(cmds, m.handleState(msg, cmds)...)...)
 }
 
+// View renders the application UI.
 func (m model) View() string {
 	return m.document.View()
 }
 
-func (m *model) handleState(msg tea.Msg, cmds []tea.Cmd) []tea.Cmd {
+// handleState updates the application state based on the current state.
+func (m model) handleState(msg tea.Msg, cmds []tea.Cmd) []tea.Cmd {
 	_, cmd := m.group.Update(msg)
 	switch m.state {
 	case BrowseState:
@@ -235,6 +247,7 @@ func (m *model) handleState(msg tea.Msg, cmds []tea.Cmd) []tea.Cmd {
 	return append(cmds, cmd)
 }
 
+// updateViewport updates the viewport with the selected character's details.
 func (m model) updateViewport() {
 	if currentRow := m.table.SelectedRow(); currentRow != nil {
 		currentId := currentRow[0]
@@ -250,6 +263,7 @@ func (m model) updateViewport() {
 	}
 }
 
+// setTableRows sets the table rows with the provided character data.
 func (m model) setTableRows(data []character) {
 	rows := make([]btTable.Row, 0)
 
@@ -261,6 +275,7 @@ func (m model) setTableRows(data []character) {
 	m.table.Model.SetRows(rows)
 }
 
+// main is the entry point of the application.
 func main() {
 	if len(os.Getenv("DEBUG")) > 0 {
 		f, err := tea.LogToFile("debug.log", "debug")
