@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -42,16 +43,16 @@ const characterTpl = `
 // model represents the application state.
 type model struct {
 	group     *group.Model
-	statusBar *statusbar.Model
 	table     *table.Model
 	viewport  *viewport.Model
+	statusBar *statusbar.Model
 	spinner   spinner.Model
 	renderer  *glamour.TermRenderer
 	document  *layout.Layout
 
 	bindings *keyBindings
 
-	characters map[string]character
+	characters []character
 
 	api   *swDbApi
 	state int
@@ -164,7 +165,7 @@ func initialModel() model {
 		document:   document,
 		renderer:   renderer,
 		bindings:   bindings,
-		characters: make(map[string]character),
+		characters: make([]character, 0),
 		api:        &swDbApi{1, 20},
 	}
 }
@@ -208,15 +209,18 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 
 		}
+
 	case onlineMsg:
 		cmds = append(cmds, m.api.getCharacters, m.spinner.Tick)
 		m.state = DownloadingState
 
 	case charactersResponseMsg:
+		log.Println("Got Response")
 		m.state = GotResponseState
+
 	}
 
-	return m, tea.Batch(append(cmds, m.handleState(msg, cmds)...)...)
+	return m, tea.Batch(m.handleState(msg, cmds)...)
 }
 
 // View renders the application UI.
@@ -225,14 +229,27 @@ func (m model) View() string {
 }
 
 // handleState updates the application state based on the current state.
-func (m model) handleState(msg tea.Msg, cmds []tea.Cmd) []tea.Cmd {
+func (m *model) handleState(msg tea.Msg, cmds []tea.Cmd) []tea.Cmd {
 	_, cmd := m.group.Update(msg)
 	switch m.state {
 	case BrowseState:
 		m.updateViewport()
+		currRow := m.table.Model.Cursor() + 1
+		if currRow < len(m.characters) {
+			browseStatus := fmt.Sprintf(
+				"Browse the results using arrow keys - Item %d/%d - Page %d",
+				currRow,
+				len(m.characters),
+				m.api.page,
+			)
+			m.statusBar.SetContent("Browse 📖", browseStatus, "API 🟢")
+		} else {
+			m.api.page++
+			cmds = append(cmds, m.api.ping)
+		}
 
 	case GotResponseState:
-		m.setTableRows(msg.(charactersResponseMsg).Data)
+		m.updateTableRows(msg.(charactersResponseMsg).Data)
 		m.updateViewport()
 		m.statusBar.SetContent("Browse 📖", "Browse the results using arrow keys", "API 🟢")
 		m.state = BrowseState
@@ -249,30 +266,40 @@ func (m model) handleState(msg tea.Msg, cmds []tea.Cmd) []tea.Cmd {
 
 // updateViewport updates the viewport with the selected character's details.
 func (m model) updateViewport() {
-	if currentRow := m.table.SelectedRow(); currentRow != nil {
-		currentId := currentRow[0]
-		character := m.characters[currentId]
-
-		// FIXME: The use of a standard '-' character causes rendering
-		// issues within the viewport. Further investigation is
-		// required to resolve this issue.
-		description := strings.Replace(character.Description, "-", "–", -1)
-
-		md, _ := m.renderer.Render(fmt.Sprintf(characterTpl, character.ID, character.Name, description))
-		m.viewport.SetContent(md)
-	}
+	character := m.characters[m.table.Cursor()]
+	md, _ := m.renderer.Render(
+		fmt.Sprintf(
+			characterTpl,
+			character.ID,
+			sanitize(character.Name),
+			sanitize(character.Description),
+		),
+	)
+	m.viewport.SetContent(md)
 }
 
 // setTableRows sets the table rows with the provided character data.
-func (m model) setTableRows(data []character) {
-	rows := make([]btTable.Row, 0)
-
+func (m *model) updateTableRows(data []character) {
 	for _, c := range data {
-		rows = append(rows, btTable.Row{c.ID, c.Name})
-		m.characters[c.ID] = c
+		m.characters = append(m.characters, c)
 	}
 
+	rows := make([]btTable.Row, 0)
+
+	for _, character := range m.characters {
+		rows = append(rows, btTable.Row{character.ID, sanitize(character.Name)})
+	}
+
+	log.Println(len(rows))
+
 	m.table.Model.SetRows(rows)
+}
+
+func sanitize(text string) string {
+	// FIXME: The use of a standard '-' character causes rendering
+	// issues within the viewport. Further investigation is
+	// required to resolve this problem.
+	return strings.Replace(text, "-", "–", -1)
 }
 
 // main is the entry point of the application.
