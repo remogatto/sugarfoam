@@ -290,16 +290,18 @@ func (m model) updateImage() tea.Msg {
 
 // updateViewport updates the viewport with the selected character's details.
 func (m model) updateViewport() {
-	character := m.characters[m.table.Cursor()]
-	md, _ := m.renderer.Render(
-		fmt.Sprintf(
-			characterTpl,
-			character.ID,
-			sanitize(character.Name),
-			sanitize(character.Description),
-		),
-	)
-	m.viewport.SetContent(md)
+	if m.table.Cursor() > 0 {
+		character := m.characters[m.table.Cursor()]
+		md, _ := m.renderer.Render(
+			fmt.Sprintf(
+				characterTpl,
+				character.ID,
+				sanitize(character.Name),
+				sanitize(character.Description),
+			),
+		)
+		m.viewport.SetContent(md)
+	}
 }
 
 // setTableRows sets the table rows with the provided character data.

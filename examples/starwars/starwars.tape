@@ -60,18 +60,19 @@ Output starwars.gif
 Require echo
 
 Set Shell "bash"
-Set FontSize 12
+Set FontSize 13
 Set Width 1200
 Set Height 600
 
 Type "./starwars"
-Enter
-Sleep 5000ms
-Down
-Sleep 500ms
-Down
-Down
-Sleep 500ms
-Down
+Enter@5
+Down@1
+Down@1
+Down@1
+Down@1
+Down@1
+Down@1
+Down@1
+Down@1
+Down@1
 
-Sleep 5s
