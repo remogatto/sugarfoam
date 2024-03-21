@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
@@ -14,6 +13,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/remogatto/sugarfoam/components/group"
 	"github.com/remogatto/sugarfoam/components/header"
+	"github.com/remogatto/sugarfoam/components/image"
 	"github.com/remogatto/sugarfoam/components/statusbar"
 	"github.com/remogatto/sugarfoam/components/table"
 	"github.com/remogatto/sugarfoam/components/viewport"
@@ -23,9 +23,9 @@ import (
 
 // Application states.
 const (
-	GotConnectionState = iota
+	CheckConnectionState = iota
+	GotConnectionState
 	GotResponseState
-	BeginDownloadState
 	DownloadingState
 	BrowseState
 )
@@ -40,11 +40,16 @@ const characterTpl = `
 %s
 `
 
+type loadImgMsg struct {
+	url string
+}
+
 // model represents the application state.
 type model struct {
 	group     *group.Model
 	table     *table.Model
 	viewport  *viewport.Model
+	image     *image.Model
 	statusBar *statusbar.Model
 	spinner   spinner.Model
 	renderer  *glamour.TermRenderer
@@ -127,11 +132,16 @@ func initialModel() model {
 	)
 
 	bindings := newBindings(group)
-	statusBar := statusbar.New(bindings, statusbar.WithContent("Idle", "", "API 🔴"))
+	statusBar := statusbar.New(bindings, statusbar.WithContent(formats[CheckConnectionState]...))
 
 	header := header.New(
 		header.WithContent(
-			lipgloss.NewStyle().Bold(true).Border(lipgloss.NormalBorder(), false, false, true, false).Render("⭐🌌 Star Wars characters browser 🌌⭐"),
+			lipgloss.NewStyle().Bold(true).Border(
+				lipgloss.NormalBorder(),
+				false,
+				false,
+				true,
+				false).Render("⭐🌌 Star Wars characters browser 🌌⭐"),
 		),
 	)
 
@@ -174,7 +184,7 @@ func initialModel() model {
 func (m model) Init() tea.Cmd {
 	var cmds []tea.Cmd
 
-	cmds = append(cmds, m.group.Init(), m.api.ping)
+	cmds = append(cmds, m.group.Init(), m.api.checkConnection)
 
 	m.group.Focus()
 
@@ -210,12 +220,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		}
 
-	case onlineMsg:
-		cmds = append(cmds, m.api.getCharacters, m.spinner.Tick)
-		m.state = DownloadingState
+	case checkConnectionMsg:
+		m.state = CheckConnectionState
+
+		if msg {
+			cmds = append(cmds, m.api.getCharacters, m.spinner.Tick)
+			m.state = DownloadingState
+		}
 
 	case charactersResponseMsg:
-		log.Println("Got Response")
 		m.state = GotResponseState
 
 	}
@@ -231,37 +244,48 @@ func (m model) View() string {
 // handleState updates the application state based on the current state.
 func (m *model) handleState(msg tea.Msg, cmds []tea.Cmd) []tea.Cmd {
 	_, cmd := m.group.Update(msg)
+
 	switch m.state {
+
+	case CheckConnectionState:
+		m.statusBar.SetContent(formats[CheckConnectionState]...)
+
 	case BrowseState:
 		m.updateViewport()
 		currRow := m.table.Model.Cursor() + 1
+
 		if currRow < len(m.characters) {
-			browseStatus := fmt.Sprintf(
-				"Browse the results using arrow keys - Item %d/%d - Page %d",
-				currRow,
-				len(m.characters),
-				m.api.page,
+			m.statusBar.SetContent(formats[BrowseState][0],
+				fmt.Sprintf(formats[BrowseState][1], currRow, len(m.characters)),
+				formats[BrowseState][2],
 			)
-			m.statusBar.SetContent("Browse 📖", browseStatus, "API 🟢")
 		} else {
 			m.api.page++
-			cmds = append(cmds, m.api.ping)
+			cmds = append(cmds, m.api.checkConnection)
 		}
 
 	case GotResponseState:
 		m.updateTableRows(msg.(charactersResponseMsg).Data)
 		m.updateViewport()
-		m.statusBar.SetContent("Browse 📖", "Browse the results using arrow keys", "API 🟢")
+
+		m.statusBar.SetContent(formats[BrowseState]...)
 		m.state = BrowseState
 
 	case DownloadingState:
 		var cmd tea.Cmd
+
 		m.spinner, cmd = m.spinner.Update(msg)
+		m.statusBar.SetContent(fmt.Sprintf(formats[DownloadingState][0], m.spinner.View()), formats[DownloadingState][1], formats[DownloadingState][2])
+
 		cmds = append(cmds, cmd)
-		m.statusBar.SetContent(fmt.Sprintf("Loading %s", m.spinner.View()), "Fetching results from the endpoint", "API 🟢")
 	}
 
 	return append(cmds, cmd)
+}
+
+func (m model) updateImage() tea.Msg {
+	character := m.characters[m.table.Cursor()]
+	return loadImgMsg{character.ImageURL}
 }
 
 // updateViewport updates the viewport with the selected character's details.
@@ -289,8 +313,6 @@ func (m *model) updateTableRows(data []character) {
 	for _, character := range m.characters {
 		rows = append(rows, btTable.Row{character.ID, sanitize(character.Name)})
 	}
-
-	log.Println(len(rows))
 
 	m.table.Model.SetRows(rows)
 }

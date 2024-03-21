@@ -135,3 +135,27 @@ func (l *Layout) View() string {
 
 	return l.styles.Container.Render(lipgloss.JoinVertical(lipgloss.Top, views...))
 }
+
+func (l *Layout) CanGrow() bool {
+	return true
+}
+
+func (l *Layout) GetHeight() int {
+	return l.height
+}
+
+func (l *Layout) GetWidth() int {
+	return l.width
+}
+
+// SetWidth sets the width of the UI component.
+func (l *Layout) SetWidth(width int) {
+	l.width = width - l.styles.Container.GetHorizontalFrameSize()
+	l.styles.Container = l.styles.Container.Width(l.width)
+}
+
+// SetHeight sets the height of the UI component.
+func (l *Layout) SetHeight(height int) {
+	l.height = height - l.styles.Container.GetHorizontalFrameSize()
+	l.styles.Container = l.styles.Container.Height(l.height)
+}

@@ -16,9 +16,9 @@ func WithStyles(styles *foam.Styles) Option {
 	}
 }
 
-func WithContent(left, center, right string) Option {
+func WithContent(strings ...string) Option {
 	return func(sb *Model) {
-		sb.left, sb.center, sb.right = left, center, right
+		sb.left, sb.center, sb.right = strings[0], strings[1], strings[2]
 	}
 }
 
@@ -41,8 +41,8 @@ func New(bindings help.KeyMap, opts ...Option) *Model {
 	return m
 }
 
-func (m *Model) SetContent(left, center, right string) {
-	m.left, m.center, m.right = left, center, right
+func (m *Model) SetContent(strings ...string) {
+	m.left, m.center, m.right = strings[0], strings[1], strings[2]
 }
 
 func (m *Model) View() string {

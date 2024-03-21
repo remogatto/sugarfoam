@@ -16,7 +16,7 @@ const (
 	charactersEndpoint = "https://starwars-databank-server.vercel.app/api/v1/characters"
 )
 
-type onlineMsg bool
+type checkConnectionMsg bool
 
 type character struct {
 	ID          string `json:"_id"`
@@ -48,13 +48,13 @@ func newSwDbApi(page, limit int) *swDbApi {
 	}
 }
 
-func (api *swDbApi) ping() tea.Msg {
+func (api *swDbApi) checkConnection() tea.Msg {
 	resp, err := http.Get(charactersEndpoint)
 	if err != nil {
-		return onlineMsg(false)
+		return checkConnectionMsg(false)
 	}
 
-	return onlineMsg(resp.StatusCode == http.StatusOK)
+	return checkConnectionMsg(resp.StatusCode == http.StatusOK)
 }
 
 func (api *swDbApi) getCharacters() tea.Msg {
@@ -86,8 +86,7 @@ func (api *swDbApi) getCharacters() tea.Msg {
 		return response
 	}
 
-	// Add an artificial lag in order to admire the loading spinner :)
-	time.Sleep(1 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	return response
 }
