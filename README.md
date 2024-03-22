@@ -1,16 +1,17 @@
 # SugarFoam
-<p>
-  <img src="https://github.com/remogatto/sugarfoam/assets/22067/c87fca22-65bf-4492-aebd-e5b739a7b7c8" width="233" alt="The SugarFoam Logo">
-</p>
-
-[![Go Reference](https://pkg.go.dev/badge/github.com/remogatto/sugarfoam.svg)](https://pkg.go.dev/github.com/remogatto/sugarfoam)
-[![Build Status](https://github.com/remogatto/sugarfoam/workflows/build/badge.svg)](https://github.com/remogatto/sugarfoam/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/remogatto/sugarfoam)](https://goreportcard.com/report/github.com/remogatto/sugarfoam)
 
 SugarFoam is a library written in Go, based on the delightful [Bubble
 Tea](https://github.com/charmbracelet/bubbletea), aiming to provide a higher-level API compared to the latter. 
 
 With SugarFoam, it is possible to develop TUI applications that present organized components in layouts. Compared to BubbleTea, it tries to save a bit of boilerplate code, especially if you want to develop applications that present articulated components such as tabgroup, statusbar, etc.
+
+[![Go Reference](https://pkg.go.dev/badge/github.com/remogatto/sugarfoam.svg)](https://pkg.go.dev/github.com/remogatto/sugarfoam)
+[![Build Status](https://github.com/remogatto/sugarfoam/workflows/build/badge.svg)](https://github.com/remogatto/sugarfoam/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/remogatto/sugarfoam)](https://goreportcard.com/report/github.com/remogatto/sugarfoam)
+
+# Demo
+
+![Starwars characters browser](https://github.com/remogatto/sugarfoam/blob/main/examples/starwars/starwars.gif)
 
 # Project Status
 
