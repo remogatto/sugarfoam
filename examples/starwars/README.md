@@ -1,5 +1,8 @@
 # Star Wars characters browser
 
+![Starwars characters browser](https://github.com/remogatto/sugarfoam/blob/main/examples/starwars/starwars.gif)
+
+
 This Go program is a terminal-based application that browses Star Wars
 characters using [this](https://starwars-databank.vercel.app/) Star
 Wars Database API. It utilizes the Bubble Tea framework for building
