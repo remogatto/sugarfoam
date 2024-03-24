@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
@@ -19,6 +20,10 @@ import (
 	"github.com/remogatto/sugarfoam/components/viewport"
 	"github.com/remogatto/sugarfoam/layout"
 	"github.com/remogatto/sugarfoam/layout/tiled"
+)
+
+const (
+	DraculaStyle = "dracula"
 )
 
 // Application states.
@@ -191,49 +196,98 @@ func (m model) Init() tea.Cmd {
 	return tea.Batch(cmds...)
 }
 
-// Update updates the application state based on messages.
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmds []tea.Cmd
+	var (
+		cmd  tea.Cmd
+		cmds []tea.Cmd
+	)
 
 	switch msg := msg.(type) {
-
 	case tea.WindowSizeMsg:
-		m.group.SetSize(msg.Width, msg.Height)
-		m.document.SetSize(msg.Width, msg.Height)
-
-		renderer, err := glamour.NewTermRenderer(
-			glamour.WithStandardStyle("dracula"),
-			glamour.WithWordWrap(m.viewport.GetWidth()),
-		)
-		if err != nil {
-			panic(err)
-		}
-
-		m.renderer = renderer
-
-		m.api.limit = m.group.GetHeight() * 2
-
+		m.handleWindowSize(msg)
 	case tea.KeyMsg:
-		switch {
-		case key.Matches(msg, m.bindings.quit):
-			return m, tea.Quit
-
-		}
-
+		cmds = m.handleKeyMsg(msg, cmds)
 	case checkConnectionMsg:
-		m.state = CheckConnectionState
-
-		if msg {
-			cmds = append(cmds, m.api.getCharacters, m.spinner.Tick)
-			m.state = DownloadingState
-		}
-
+		cmds = m.handleCheckConnectionMsg(msg, cmds)
+		m.state = DownloadingState
 	case charactersResponseMsg:
-		m.state = GotResponseState
+		m.handleCharactersResponseMsg(msg)
+		m.state = BrowseState
+	default:
+		if m.state == DownloadingState {
+			return m.handleSpinner(msg)
+		}
 
 	}
 
-	return m, tea.Batch(m.handleState(msg, cmds)...)
+	_, cmd = m.group.Update(msg)
+	cmds = append(cmds, cmd)
+
+	if m.state == BrowseState {
+		currRow := m.table.Model.Cursor() + 1
+		m.statusBar.SetContent(formats[BrowseState][0],
+			fmt.Sprintf(formats[BrowseState][1], currRow, len(m.characters)),
+			formats[BrowseState][2],
+		)
+
+		cmd = m.updateViewport()
+		cmds = append(cmds, cmd)
+	}
+
+	return m, tea.Batch(cmds...)
+}
+
+func (m *model) handleSpinner(msg tea.Msg) (tea.Model, tea.Cmd) {
+	var cmd tea.Cmd
+	m.spinner, cmd = m.spinner.Update(msg)
+	m.statusBar.SetContent(
+		fmt.Sprintf(formats[DownloadingState][0], m.spinner.View()),
+		formats[DownloadingState][1],
+		formats[DownloadingState][2],
+	)
+
+	return m, cmd
+
+}
+
+func (m *model) handleWindowSize(msg tea.WindowSizeMsg) {
+	m.group.SetSize(msg.Width, msg.Height)
+	m.document.SetSize(msg.Width, msg.Height)
+	m.renderer = m.createRenderer(msg.Width)
+	m.api.limit = m.group.GetHeight() * 2
+}
+
+func (m *model) createRenderer(width int) *glamour.TermRenderer {
+	renderer, err := glamour.NewTermRenderer(
+		glamour.WithStandardStyle(DraculaStyle),
+		glamour.WithWordWrap(m.viewport.GetWidth()),
+	)
+	if err != nil {
+		// Log the error instead of panicking
+		log.Println("Error creating renderer:", err)
+		return nil
+	}
+	return renderer
+}
+
+func (m *model) handleKeyMsg(msg tea.KeyMsg, cmds []tea.Cmd) []tea.Cmd {
+	if key.Matches(msg, m.bindings.quit) {
+		return append(cmds, tea.Quit)
+	}
+	return cmds
+}
+
+func (m *model) handleCheckConnectionMsg(msg checkConnectionMsg, cmds []tea.Cmd) []tea.Cmd {
+	if msg {
+		cmds = append(cmds, m.api.getCharacters, m.spinner.Tick)
+	}
+
+	return cmds
+}
+
+func (m *model) handleCharactersResponseMsg(msg charactersResponseMsg) {
+	m.updateTableRows(msg.Data)
+	m.updateViewport()
 }
 
 // View renders the application UI.
@@ -241,56 +295,15 @@ func (m model) View() string {
 	return m.document.View()
 }
 
-// handleState updates the application state based on the current state.
-func (m *model) handleState(msg tea.Msg, cmds []tea.Cmd) []tea.Cmd {
-	_, cmd := m.group.Update(msg)
+// updateViewport updates the viewport with the selected character's details.
+func (m model) updateViewport() tea.Cmd {
 
-	switch m.state {
-
-	case CheckConnectionState:
-		m.statusBar.SetContent(formats[CheckConnectionState]...)
-
-	case BrowseState:
-		m.updateViewport()
-		currRow := m.table.Model.Cursor() + 1
-
-		if currRow < len(m.characters) {
-			m.statusBar.SetContent(formats[BrowseState][0],
-				fmt.Sprintf(formats[BrowseState][1], currRow, len(m.characters)),
-				formats[BrowseState][2],
-			)
-		} else {
+	if m.table.Cursor() >= 0 {
+		if m.table.Cursor() >= len(m.characters)-1 {
 			m.api.page++
-			cmds = append(cmds, m.api.checkConnection)
+			return m.api.checkConnection
 		}
 
-	case GotResponseState:
-		m.updateTableRows(msg.(charactersResponseMsg).Data)
-		m.updateViewport()
-
-		m.statusBar.SetContent(formats[BrowseState]...)
-		m.state = BrowseState
-
-	case DownloadingState:
-		var cmd tea.Cmd
-
-		m.spinner, cmd = m.spinner.Update(msg)
-		m.statusBar.SetContent(fmt.Sprintf(formats[DownloadingState][0], m.spinner.View()), formats[DownloadingState][1], formats[DownloadingState][2])
-
-		cmds = append(cmds, cmd)
-	}
-
-	return append(cmds, cmd)
-}
-
-func (m model) updateImage() tea.Msg {
-	character := m.characters[m.table.Cursor()]
-	return loadImgMsg{character.ImageURL}
-}
-
-// updateViewport updates the viewport with the selected character's details.
-func (m model) updateViewport() {
-	if m.table.Cursor() > 0 {
 		character := m.characters[m.table.Cursor()]
 		md, _ := m.renderer.Render(
 			fmt.Sprintf(
@@ -302,6 +315,8 @@ func (m model) updateViewport() {
 		)
 		m.viewport.SetContent(md)
 	}
+
+	return nil
 }
 
 // setTableRows sets the table rows with the provided character data.
