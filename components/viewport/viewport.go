@@ -64,6 +64,12 @@ func (m *Model) Init() tea.Cmd {
 
 // Update updates the viewport model based on the received message.
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg.(type) {
+	case tea.KeyMsg:
+		if !m.focused {
+			return m, nil
+		}
+	}
 	t, cmd := m.Model.Update(msg)
 	m.Model = &t
 

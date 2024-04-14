@@ -5,8 +5,6 @@ package layout
 // for styling and resizing. The package is designed to work with the Lipgloss library
 // for styling, providing a visually appealing interface.
 import (
-	"log"
-
 	"github.com/charmbracelet/lipgloss"
 )
 
@@ -109,10 +107,7 @@ func (l *Layout) SetSize(width int, height int) {
 	w := width - l.styles.Container.GetHorizontalFrameSize()
 	h := height - l.styles.Container.GetVerticalFrameSize()
 
-	for i, item := range l.items {
-		if i == 3 {
-			log.Println("Status W", w)
-		}
+	for _, item := range l.items {
 		item.SetWidth(w)
 	}
 

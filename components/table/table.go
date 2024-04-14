@@ -108,6 +108,13 @@ func (t *Model) SetSize(w, h int) {
 	t.SetHeight(h)
 }
 
+func (m *Model) SetRelWidths(percentages ...int) {
+	m.RelWidths = make([]int, 0)
+	m.RelWidths = append(m.RelWidths, percentages...)
+
+	m.SetWidth(m.GetWidth())
+}
+
 func (m *Model) GetHeight() int {
 	return lipgloss.Height(m.View())
 }
