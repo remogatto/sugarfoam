@@ -24,13 +24,12 @@ type Model struct {
 func New(opts ...Option) *Model {
 	group := new(Model)
 
+	group.KeyMap = DefaultKeyMap()
+	group.SetStyles(foam.DefaultStyles())
+
 	for _, opt := range opts {
 		opt(group)
 	}
-
-	group.KeyMap = DefaultKeyMap()
-
-	group.SetStyles(foam.DefaultStyles())
 
 	return group
 }
@@ -90,7 +89,8 @@ func (g *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch {
 		case key.Matches(msg, g.KeyMap.FocusNext):
 			cmds = append(cmds, g.nextFocus())
-
+		case key.Matches(msg, g.KeyMap.FocusPrev):
+			cmds = append(cmds, g.prevFocus())
 		}
 	}
 
@@ -129,6 +129,14 @@ func (g *Model) nextFocus() tea.Cmd {
 	g.Current().Blur()
 
 	g.currFocus = (g.currFocus + 1) % len(g.items)
+
+	return g.Current().Focus()
+}
+
+func (g *Model) prevFocus() tea.Cmd {
+	g.Current().Blur()
+
+	g.currFocus = (g.currFocus - 1) % len(g.items)
 
 	return g.Current().Focus()
 }
