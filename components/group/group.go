@@ -128,7 +128,10 @@ func WithLayout(layout *layout.Layout) Option {
 func (g *Model) nextFocus() tea.Cmd {
 	g.Current().Blur()
 
-	g.currFocus = (g.currFocus + 1) % len(g.items)
+	g.currFocus--
+	if g.currFocus < 0 {
+		g.currFocus = len(g.items) - 1
+	}
 
 	return g.Current().Focus()
 }
