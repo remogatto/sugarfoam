@@ -297,7 +297,6 @@ func (m model) View() string {
 
 // updateViewport updates the viewport with the selected character's details.
 func (m model) updateViewport() tea.Cmd {
-
 	if m.table.Cursor() >= 0 {
 		if m.table.Cursor() >= len(m.characters)-1 {
 			m.api.page++

@@ -124,6 +124,13 @@ func (t *Model) Init() tea.Cmd {
 }
 
 func (t *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg.(type) {
+	case tea.KeyMsg:
+		if !t.Focused() {
+			return t, nil
+		}
+	}
+
 	table, cmd := t.Model.Update(msg)
 
 	t.Model = &table

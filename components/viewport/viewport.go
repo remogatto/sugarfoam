@@ -9,6 +9,7 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/x/ansi"
 	foam "github.com/remogatto/sugarfoam"
 )
 
@@ -29,6 +30,7 @@ type Model struct {
 	foam.Common
 	*viewport.Model
 
+	content string
 	focused bool
 }
 
@@ -101,10 +103,11 @@ func (m *Model) GetHeight() int {
 	return lipgloss.Height(m.View())
 }
 
-func (t *Model) SetWidth(width int) {
-	t.Model.Width = width
-	ww := lipgloss.Width(t.Model.View()) - width
-	t.Model.Width = width - ww
+func (m *Model) SetWidth(width int) {
+	m.Model.Width = width
+	ww := lipgloss.Width(m.Model.View()) - width
+	m.Model.Width = width - ww
+	m.SetContent(m.content)
 }
 
 func (t *Model) SetHeight(height int) {
@@ -120,6 +123,12 @@ func (t *Model) SetSize(w, h int) {
 
 	t.SetWidth(w)
 	t.SetHeight(h)
+}
+
+func (m *Model) SetContent(s string) {
+	m.content = s
+	wrap := ansi.Hardwrap(s, m.Model.Width-2, false)
+	m.Model.SetContent(wrap)
 }
 
 // View renders the viewport model, applying the appropriate style
